@@ -44,7 +44,7 @@ jobs:
   build-raspbian:
     strategy:
       matrix:
-        arch: [linux/arm/v7, linux/arm64]
+        arch: [linux/arm/v7]
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
