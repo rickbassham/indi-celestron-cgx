@@ -7,7 +7,7 @@ jobs:
   build:
     strategy:
       matrix:
-        arch: [linux/amd64, linux/arm64, linux/arm/v7]
+        arch: [linux/amd64, linux/arm64]
         os: ["20.04", "18.04", "16.04"]
     runs-on: ubuntu-20.04
     steps:
