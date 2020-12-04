@@ -95,6 +95,9 @@ private:
   /// used by GoTo and Park
   void StartSlew(double ra, double dec, TelescopeStatus status);
 
+  INumber LocationDebugN[2];
+  INumberVectorProperty LocationDebugNP;
+
   INumber EncoderTicksN[2];
   INumberVectorProperty EncoderTicksNP;
 

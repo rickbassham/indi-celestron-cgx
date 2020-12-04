@@ -102,6 +102,11 @@ bool CelestronCGX::initProperties()
     IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS", "Encoder Ticks",
                        MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
 
+    IUFillNumber(&LocationDebugN[0], "HA", "HA (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
+    IUFillNumber(&LocationDebugN[1], "LST", "LST (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
+    IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG", "Hour Angle", MAIN_CONTROL_TAB,
+                       IP_RO, 60, IPS_IDLE);
+
     // Add Tracking Modes, the order must match the order of the TelescopeTrackMode enum
     AddTrackMode("TRACK_SIDEREAL", "Sidereal", true);
     AddTrackMode("TRACK_SOLAR", "Solar");
@@ -154,6 +159,7 @@ bool CelestronCGX::updateProperties()
         loadConfig(true, GuideRateNP.name);
 
         defineNumber(&EncoderTicksNP);
+        defineNumber(&LocationDebugNP);
 
         defineSwitch(&AlignSP);
         defineText(&VersionTP);
@@ -184,6 +190,7 @@ bool CelestronCGX::updateProperties()
         deleteProperty(GuideWENP.name);
         deleteProperty(GuideRateNP.name);
         deleteProperty(EncoderTicksNP.name);
+        deleteProperty(LocationDebugNP.name);
         deleteProperty(AlignSP.name);
         deleteProperty(VersionTP.name);
     }
@@ -285,42 +292,6 @@ bool CelestronCGX::Disconnect()
 bool CelestronCGX::Handshake()
 {
     LOG_INFO("Starting Handshake");
-
-    uint32_t enc = encoderFromHourAngle(6.0);
-    double ha = hourAngleFromEncoder(enc);
-
-    LOGF_INFO("enc: %d; ha: %0.3f", enc, ha);
-
-    enc = encoderFromHourAngle(12.0);
-    ha = hourAngleFromEncoder(enc);
-
-    LOGF_INFO("enc: %d; ha: %0.3f", enc, ha);
-
-    enc = encoderFromHourAngle(0.0);
-    ha = hourAngleFromEncoder(enc);
-
-    LOGF_INFO("enc: %d; ha: %0.3f", enc, ha);
-
-    double dec = 90.0;
-    TelescopePierSide pierSide = PIER_WEST;
-    enc = encoderFromDecAndPierSide(dec, pierSide);
-    decAndPierSideFromEncoder(enc, dec, pierSide);
-
-    LOGF_INFO("enc: %d; dec: %0.3f; pierSide: %d", enc, dec, pierSide);
-
-    dec = 60.0;
-    pierSide = PIER_WEST;
-    enc = encoderFromDecAndPierSide(dec, pierSide);
-    decAndPierSideFromEncoder(enc, dec, pierSide);
-
-    LOGF_INFO("enc: %d; dec: %0.3f; pierSide: %d", enc, dec, pierSide);
-
-    dec = 60.0;
-    pierSide = PIER_EAST;
-    enc = encoderFromDecAndPierSide(dec, pierSide);
-    decAndPierSideFromEncoder(enc, dec, pierSide);
-
-    LOGF_INFO("enc: %d; dec: %0.3f; pierSide: %d", enc, dec, pierSide);
 
     AUXCommand raVer(GET_VER, ANY, RA);
     if (!sendCmd(raVer))
@@ -441,6 +412,11 @@ bool CelestronCGX::handleCommand(AUXCommand cmd)
         else if (cmd.src == RA)
         {
             EncoderTicksN[AXIS_RA].value = cmd.getPosition();
+
+            LocationDebugN[0].value = hourAngleFromEncoder(EncoderTicksN[AXIS_RA].value);
+            LocationDebugN[1].value = get_local_sidereal_time(lnobserver.lng);
+
+            IDSetNumber(&LocationDebugNP, nullptr);
         }
         EncoderTicksNP.s = IPS_OK;
         IDSetNumber(&EncoderTicksNP, nullptr);
@@ -1004,11 +980,7 @@ uint32_t CelestronCGX::encoderFromHourAngle(double hourAngle)
         steps = STEPS_AT_HOME_POSITION - ((6.0 - hourAngle) * STEPS_PER_HOUR);
     }
 
-    if (steps < 0)
-    {
-        steps += STEPS_PER_REVOLUTION;
-    }
-    steps = steps % STEPS_PER_REVOLUTION;
+    steps %= STEPS_PER_REVOLUTION;
 
     return steps;
 }
