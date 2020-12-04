@@ -1,5 +1,5 @@
 ARG UBUNTU_VERSION=20.04
-FROM ubuntu:${UBUNTU_VERSION}}
+FROM ubuntu:${UBUNTU_VERSION}
 
 ARG DEBIAN_FRONTEND="noninteractive"
 ENV TZ=America/New_York
