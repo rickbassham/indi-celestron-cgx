@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v1.0.3
         id: buildx
