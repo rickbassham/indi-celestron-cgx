@@ -603,6 +603,7 @@ bool CelestronCGX::ReadScopeStatus()
 
         if (!m_decSlewing && !m_raSlewing)
         {
+            SetTrackEnabled(false);
             SetParked(true);
         }
     }
@@ -664,6 +665,8 @@ bool CelestronCGX::Abort()
 
 bool CelestronCGX::Park()
 {
+    SetTrackEnabled(false);
+
     double hourAngle = GetAxis1Park();
     double dec = GetAxis2Park();
 
@@ -733,6 +736,27 @@ bool CelestronCGX::SetTrackEnabled(bool enabled)
 
 bool CelestronCGX::SetCurrentPark()
 {
+    TelescopePierSide pierSide;
+    double ra, dec;
+
+    uint32_t raSteps, decSteps;
+
+    raSteps = EncoderTicksN[AXIS_RA].value;
+    decSteps = EncoderTicksN[AXIS_DE].value;
+
+    RADecFromEncoderValues(raSteps, decSteps, ra, dec, pierSide);
+
+    double lst = get_local_sidereal_time(lnobserver.lng);
+    double hourAngle = lst - ra;
+
+    if (pierSide == PIER_WEST)
+    {
+        hourAngle -= 12.0;
+    }
+
+    SetAxis1Park(hourAngle);
+    SetAxis2Park(dec);
+
     return true;
 }
 
@@ -744,12 +768,13 @@ bool CelestronCGX::SetDefaultPark()
     return true;
 }
 
-/*
 bool CelestronCGX::SetParkPosition(double Axis1Value, double Axis2Value)
 {
+    SetAxis1Park(Axis1Value);
+    SetAxis2Park(Axis2Value);
+
     return true;
 }
-*/
 
 bool CelestronCGX::Sync(double ra, double dec)
 {

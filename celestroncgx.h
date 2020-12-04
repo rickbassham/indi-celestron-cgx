@@ -79,6 +79,7 @@ protected:
   virtual bool Sync(double ra, double dec) override;
 
   // Parking
+  virtual bool SetParkPosition(double Axis1Value, double Axis2Value) override;
   virtual bool SetCurrentPark() override;
   virtual bool SetDefaultPark() override;
   virtual bool updateLocation(double latitude, double longitude, double elevation) override;
