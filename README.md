@@ -16,6 +16,12 @@ libnova-dev, zlib1g-dev. Run following commands (you can select other install
 prefix):
 
 ```sh
+sudo apt install build-essential devscripts debhelper fakeroot cdbs software-properties-common cmake
+sudo add-apt-repository ppa:mutlaqja/ppa
+sudo apt install libindi-dev libnova-dev libz-dev libgsl-dev
+```
+
+```sh
 mkdir -p ~/Projects/build/indi-celestron-cgx
 cd ~/Projects/build/indi-celestron-cgx
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug ~/Projects/indi-celestron-cgx
