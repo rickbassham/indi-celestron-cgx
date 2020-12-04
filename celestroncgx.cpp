@@ -943,12 +943,18 @@ bool CelestronCGX::updateLocation(double latitude, double longitude, double elev
 void CelestronCGX::EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
                                           TelescopePierSide &pierSide)
 {
+    pierSide = expectedPierSide(ra);
+
     // Inverse of RADecFromEncoderValues
     double lst = get_local_sidereal_time(lnobserver.lng);
     double hourAngle = lst - ra;
 
+    if (pierSide == PIER_WEST)
+    {
+        hourAngle -= 12.0;
+    }
+
     raSteps = encoderFromHourAngle(hourAngle);
-    pierSide = expectedPierSide(ra);
     decSteps = encoderFromDecAndPierSide(dec, pierSide);
 }
 
