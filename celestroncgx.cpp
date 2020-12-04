@@ -579,8 +579,8 @@ bool CelestronCGX::ReadScopeStatus()
             // We are at switch position, so set the motor position to be
             // in the middle of the range.
 
-            // wait a second for the motors to actually stop
-            sleep(1);
+            // wait for the motors to actually stop
+            usleep(1000 * 500); // 500ms
 
             AUXCommand raCmd(MC_SET_POSITION, ANY, RA);
             raCmd.setPosition(long(0x800000));
@@ -589,6 +589,8 @@ bool CelestronCGX::ReadScopeStatus()
             AUXCommand decCmd(MC_SET_POSITION, ANY, DEC);
             decCmd.setPosition(long(0x800000));
             sendCmd(decCmd);
+
+            SetTrackEnabled(false);
 
             getDec();
             getRA();
