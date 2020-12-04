@@ -38,6 +38,6 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: debs
+          name: debs-ubuntu-${{matrix.os}}
           path: |
             *.deb
