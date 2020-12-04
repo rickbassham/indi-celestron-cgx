@@ -22,9 +22,18 @@ jobs:
         run: echo ${{ steps.buildx.outputs.platforms }}
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Build
+      - name: Build the builder
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          platforms: ${{matrix.arch}}
+          tags: cgx-build:latest
+          build-args: |
+            UBUNTU_VERSION=${{ matrix.os }}
+      - name: Build Package
         run: |
-          docker build --platform ${{ matrix.arch }} --build-arg UBUNTU_VERSION=${{ matrix.os }} -t cgx-build .
           docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'fakeroot debian/rules binary && cp ../*.deb /output'
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
