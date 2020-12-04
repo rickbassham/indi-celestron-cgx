@@ -1,0 +1,16 @@
+Source: indi-celestron-cgx
+Section: science
+Priority: extra
+Maintainer: Rick Bassham <brodrick.bassham@gmail.com>
+XSBC-Original-Maintainer: Jasem Mutlaq <mutlaqja@ikarustech.com>
+Build-Depends: debhelper (>= 6), cmake, cdbs, libindi-dev, libnova-dev, zlib1g-dev, libgsl0-dev|libgsl-dev
+Standards-Version: 3.8.0
+
+Package: indi-celestron-cgx
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: INDI driver for Celestron CGX mounts using direct USB connection.
+ .
+ This is a driver for Celestron CGX mounts using the direct USB connection without a hand controller.
+ .
+ This driver is compatible with any INDI client such as KStars or Xephem.
