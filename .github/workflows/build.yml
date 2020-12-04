@@ -44,7 +44,7 @@ jobs:
   build-raspbian:
     strategy:
       matrix:
-        arch: [linux/arm/v7]
+        arch: [linux/arm/v7, linux/arm64]
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
@@ -72,6 +72,6 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: debs-ubuntu-${{matrix.os}}
+          name: debs-raspbian
           path: |
             *.deb
