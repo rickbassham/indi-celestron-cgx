@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         arch: [linux/amd64, linux/arm64, linux/arm/v7]
-        os: ["20.10", "20.04", "18.04", "16.04"]
+        os: ["20.04", "18.04", "16.04"]
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
@@ -25,3 +25,10 @@ jobs:
       - name: Build
         run: |
           docker build --platform ${{ matrix.arch }} --build-arg UBUNTU_VERSION=${{ matrix.os }} -t cgx-build .
+          docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'fakeroot debian/rules binary && cp ../*.deb /output'
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: debs
+          path: |
+            *.deb
