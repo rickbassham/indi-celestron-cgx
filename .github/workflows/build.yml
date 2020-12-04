@@ -34,7 +34,7 @@ jobs:
             UBUNTU_VERSION=${{ matrix.os }}
       - name: Build Package
         run: |
-          docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'fakeroot debian/rules binary && cp ../*.deb /output'
+          docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'fakeroot-tcp debian/rules binary && cp ../*.deb /output'
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
