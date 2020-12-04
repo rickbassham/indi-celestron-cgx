@@ -104,7 +104,7 @@ bool CelestronCGX::initProperties()
 
     IUFillNumber(&LocationDebugN[0], "HA", "HA (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumber(&LocationDebugN[1], "LST", "LST (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
-    IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG", "Hour Angle", MAIN_CONTROL_TAB,
+    IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG", "Mount Pointing", MAIN_CONTROL_TAB,
                        IP_RO, 60, IPS_IDLE);
 
     // Add Tracking Modes, the order must match the order of the TelescopeTrackMode enum
