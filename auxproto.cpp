@@ -10,13 +10,8 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 
-#define READ_TIMEOUT 1   // s
-#define CTS_TIMEOUT  100 // ms
-#define RTS_DELAY    50  // ms
-
-#define BUFFER_SIZE 10240
 int MAX_CMD_LEN = 32;
-bool DEBUG      = true;
+bool DEBUG = true;
 
 //////////////////////////////////////////////////
 /////// Utility functions
@@ -62,7 +57,7 @@ AUXCommand::AUXCommand(AUXCommands c, AUXtargets s, AUXtargets d, buffer dat)
     dst = d;
     data.reserve(MAX_CMD_LEN);
     data = dat;
-    len  = 3 + data.size();
+    len = 3 + data.size();
 }
 
 AUXCommand::AUXCommand(AUXCommands c, AUXtargets s, AUXtargets d)
@@ -94,42 +89,42 @@ const char *AUXCommand::cmd_name(AUXCommands c)
     else
         switch (c)
         {
-            case MC_GET_POSITION:
-                return "MC_GET_POSITION";
-            case MC_GOTO_FAST:
-                return "MC_GOTO_FAST";
-            case MC_SET_POSITION:
-                return "MC_SET_POSITION";
-            case MC_SET_POS_GUIDERATE:
-                return "MC_SET_POS_GUIDERATE";
-            case MC_SET_NEG_GUIDERATE:
-                return "MC_SET_NEG_GUIDERATE";
-            case MC_LEVEL_START:
-                return "MC_LEVEL_START";
-            case MC_SLEW_DONE:
-                return "MC_SLEW_DONE";
-            case MC_GOTO_SLOW:
-                return "MC_GOTO_SLOW";
-            case MC_SEEK_INDEX:
-                return "MC_SEEK_INDEX";
-            case MC_MOVE_POS:
-                return "MC_MOVE_POS";
-            case MC_MOVE_NEG:
-                return "MC_MOVE_NEG";
-            case MC_ENABLE_CORDWRAP:
-                return "MC_ENABLE_CORDWRAP";
-            case MC_DISABLE_CORDWRAP:
-                return "MC_DISABLE_CORDWRAP";
-            case MC_SET_CORDWRAP_POS:
-                return "MC_SET_CORDWRAP_POS";
-            case MC_POLL_CORDWRAP:
-                return "MC_POLL_CORDWRAP";
-            case MC_GET_CORDWRAP_POS:
-                return "MC_GET_CORDWRAP_POS";
-            case GET_VER:
-                return "GET_VER";
-            default:
-                return nullptr;
+        case MC_GET_POSITION:
+            return "MC_GET_POSITION";
+        case MC_GOTO_FAST:
+            return "MC_GOTO_FAST";
+        case MC_SET_POSITION:
+            return "MC_SET_POSITION";
+        case MC_SET_POS_GUIDERATE:
+            return "MC_SET_POS_GUIDERATE";
+        case MC_SET_NEG_GUIDERATE:
+            return "MC_SET_NEG_GUIDERATE";
+        case MC_LEVEL_START:
+            return "MC_LEVEL_START";
+        case MC_SLEW_DONE:
+            return "MC_SLEW_DONE";
+        case MC_GOTO_SLOW:
+            return "MC_GOTO_SLOW";
+        case MC_SEEK_INDEX:
+            return "MC_SEEK_INDEX";
+        case MC_MOVE_POS:
+            return "MC_MOVE_POS";
+        case MC_MOVE_NEG:
+            return "MC_MOVE_NEG";
+        case MC_ENABLE_CORDWRAP:
+            return "MC_ENABLE_CORDWRAP";
+        case MC_DISABLE_CORDWRAP:
+            return "MC_DISABLE_CORDWRAP";
+        case MC_SET_CORDWRAP_POS:
+            return "MC_SET_CORDWRAP_POS";
+        case MC_POLL_CORDWRAP:
+            return "MC_POLL_CORDWRAP";
+        case MC_GET_CORDWRAP_POS:
+            return "MC_GET_CORDWRAP_POS";
+        case GET_VER:
+            return "GET_VER";
+        default:
+            return nullptr;
         }
 }
 
@@ -140,30 +135,30 @@ int AUXCommand::response_data_size()
     else
         switch (cmd)
         {
-            case MC_GET_POSITION:
-            case MC_GET_CORDWRAP_POS:
-                return 3;
-            case GET_VER:
-                return 4;
-            case MC_SLEW_DONE:
-            case MC_POLL_CORDWRAP:
-                return 1;
-            case MC_GOTO_FAST:
-            case MC_SET_POSITION:
-            case MC_SET_POS_GUIDERATE:
-            case MC_SET_NEG_GUIDERATE:
-            case MC_LEVEL_START:
-            case MC_GOTO_SLOW:
-            case MC_MOVE_POS:
-            case MC_MOVE_NEG:
-            case MC_ENABLE_CORDWRAP:
-            case MC_DISABLE_CORDWRAP:
-            case MC_SET_CORDWRAP_POS:
-                return 0;
-            case MC_SEEK_INDEX:
-                return -1;
-            default:
-                return -1;
+        case MC_GET_POSITION:
+        case MC_GET_CORDWRAP_POS:
+            return 3;
+        case GET_VER:
+            return 4;
+        case MC_SLEW_DONE:
+        case MC_POLL_CORDWRAP:
+            return 1;
+        case MC_GOTO_FAST:
+        case MC_SET_POSITION:
+        case MC_SET_POS_GUIDERATE:
+        case MC_SET_NEG_GUIDERATE:
+        case MC_LEVEL_START:
+        case MC_GOTO_SLOW:
+        case MC_MOVE_POS:
+        case MC_MOVE_NEG:
+        case MC_ENABLE_CORDWRAP:
+        case MC_DISABLE_CORDWRAP:
+        case MC_SET_CORDWRAP_POS:
+            return 0;
+        case MC_SEEK_INDEX:
+            return -1;
+        default:
+            return -1;
         }
 }
 
@@ -171,32 +166,32 @@ const char *AUXCommand::node_name(AUXtargets n)
 {
     switch (n)
     {
-        case ANY:
-            return "ANY";
-        case MB:
-            return "MB";
-        case HC:
-            return "HC";
-        case HCP:
-            return "HC+";
-        case AZM:
-            return "AZM";
-        case ALT:
-            return "ALT";
-        case APP:
-            return "APP";
-        case GPS:
-            return "GPS";
-        case WiFi:
-            return "WiFi";
-        case BAT:
-            return "BAT";
-        case CHG:
-            return "CHG";
-        case LIGHT:
-            return "LIGHT";
-        default:
-            return nullptr;
+    case ANY:
+        return "ANY";
+    case MB:
+        return "MB";
+    case HC:
+        return "HC";
+    case HCP:
+        return "HC+";
+    case AZM:
+        return "AZM";
+    case ALT:
+        return "ALT";
+    case APP:
+        return "APP";
+    case GPS:
+        return "GPS";
+    case WiFi:
+        return "WiFi";
+    case BAT:
+        return "BAT";
+    case CHG:
+        return "CHG";
+    case LIGHT:
+        return "LIGHT";
+    default:
+        return nullptr;
     }
 }
 
@@ -245,11 +240,11 @@ void AUXCommand::fillBuf(buffer &buf)
 
 void AUXCommand::parseBuf(buffer buf)
 {
-    len   = buf[1];
-    src   = (AUXtargets)buf[2];
-    dst   = (AUXtargets)buf[3];
-    cmd   = (AUXCommands)buf[4];
-    data  = buffer(buf.begin() + 5, buf.end() - 1);
+    len = buf[1];
+    src = (AUXtargets)buf[2];
+    dst = (AUXtargets)buf[3];
+    cmd = (AUXCommands)buf[4];
+    data = buffer(buf.begin() + 5, buf.end() - 1);
     valid = (checksum(buf) == buf.back());
     if (not valid)
     {
@@ -272,7 +267,7 @@ void AUXCommand::parseBuf(buffer buf, bool do_checksum)
 
 unsigned char AUXCommand::checksum(buffer buf)
 {
-    int l  = buf[1];
+    int l = buf[1];
     int cs = 0;
     for (int i = 1; i < l + 2; i++)
     {
@@ -287,7 +282,7 @@ unsigned char AUXCommand::checksum(buffer buf)
 // AUX commands use 24bit integer as a representation of angle in units of
 // fractional revolutions. Thus 2^24 steps makes full revolution.
 const long STEPS_PER_REVOLUTION = 16777216;
-const double STEPS_PER_DEGREE   = STEPS_PER_REVOLUTION / 360.0;
+const double STEPS_PER_DEGREE = STEPS_PER_REVOLUTION / 360.0;
 
 long AUXCommand::getPosition()
 {
@@ -324,6 +319,6 @@ void AUXCommand::setPosition(uint32_t p)
 void AUXCommand::setRate(unsigned char r)
 {
     data.resize(1);
-    len     = 4;
+    len = 4;
     data[0] = r;
 }

@@ -41,97 +41,97 @@
 class CelestronCGX : public INDI::Telescope, public INDI::GuiderInterface
 
 {
-  public:
-    CelestronCGX();
-    virtual ~CelestronCGX() = default;
+public:
+  CelestronCGX();
+  virtual ~CelestronCGX() = default;
 
-    virtual const char *getDefaultName() override;
-    virtual bool Connect() override;
-    virtual bool Disconnect() override;
-    virtual bool ReadScopeStatus() override;
-    virtual bool initProperties() override;
-    virtual void ISGetProperties(const char *dev) override;
-    virtual bool updateProperties() override;
-    virtual bool Handshake() override;
+  virtual const char *getDefaultName() override;
+  virtual bool Connect() override;
+  virtual bool Disconnect() override;
+  virtual bool ReadScopeStatus() override;
+  virtual bool initProperties() override;
+  virtual void ISGetProperties(const char *dev) override;
+  virtual bool updateProperties() override;
+  virtual bool Handshake() override;
 
-    virtual bool ISNewNumber(const char *dev, const char *name, double values[], char *names[], int n) override;
-    virtual bool ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int n) override;
-    virtual bool ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[],
-                           char *formats[], char *names[], int n) override;
-    virtual bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n) override;
+  virtual bool ISNewNumber(const char *dev, const char *name, double values[], char *names[], int n) override;
+  virtual bool ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int n) override;
+  virtual bool ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[],
+                         char *formats[], char *names[], int n) override;
+  virtual bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n) override;
 
-  protected:
-    virtual bool MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command) override;
-    virtual bool MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command) override;
-    virtual bool Abort() override;
+protected:
+  virtual bool MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command) override;
+  virtual bool MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command) override;
+  virtual bool Abort() override;
 
-    virtual IPState GuideNorth(uint32_t ms) override;
-    virtual IPState GuideSouth(uint32_t ms) override;
-    virtual IPState GuideEast(uint32_t ms) override;
-    virtual IPState GuideWest(uint32_t ms) override;
+  virtual IPState GuideNorth(uint32_t ms) override;
+  virtual IPState GuideSouth(uint32_t ms) override;
+  virtual IPState GuideEast(uint32_t ms) override;
+  virtual IPState GuideWest(uint32_t ms) override;
 
-    virtual bool SetTrackMode(uint8_t mode) override;
-    virtual bool SetTrackEnabled(bool enabled) override;
+  virtual bool SetTrackMode(uint8_t mode) override;
+  virtual bool SetTrackEnabled(bool enabled) override;
 
-    virtual bool Goto(double, double) override;
-    virtual bool Park() override;
-    virtual bool UnPark() override;
-    virtual bool Sync(double ra, double dec) override;
+  virtual bool Goto(double, double) override;
+  virtual bool Park() override;
+  virtual bool UnPark() override;
+  virtual bool Sync(double ra, double dec) override;
 
-    // Parking
-    virtual bool SetCurrentPark() override;
-    virtual bool SetDefaultPark() override;
-    virtual bool updateLocation(double latitude, double longitude, double elevation) override;
+  // Parking
+  virtual bool SetCurrentPark() override;
+  virtual bool SetDefaultPark() override;
+  virtual bool updateLocation(double latitude, double longitude, double elevation) override;
 
-    virtual bool saveConfigItems(FILE *fp) override;
+  virtual bool saveConfigItems(FILE *fp) override;
 
-  private:
-    static const uint32_t STEPS_PER_REVOLUTION;
-    static const uint32_t STEPS_AT_HOME_POSITION;
-    static const double STEPS_PER_DEGREE;
-    static const double STEPS_PER_HOUR;
-    static const double DEFAULT_SLEW_RATE;
+private:
+  static const uint32_t STEPS_PER_REVOLUTION;
+  static const uint32_t STEPS_AT_HOME_POSITION;
+  static const double STEPS_PER_DEGREE;
+  static const double STEPS_PER_HOUR;
+  static const double DEFAULT_SLEW_RATE;
 
-    /// used by GoTo and Park
-    void StartSlew(double ra, double dec, TelescopeStatus status);
+  /// used by GoTo and Park
+  void StartSlew(double ra, double dec, TelescopeStatus status);
 
-    INumber EncoderTicksN[2];
-    INumberVectorProperty EncoderTicksNP;
+  INumber EncoderTicksN[2];
+  INumberVectorProperty EncoderTicksNP;
 
-    INumber GuideRateN[2];
-    INumberVectorProperty GuideRateNP;
+  INumber GuideRateN[2];
+  INumberVectorProperty GuideRateNP;
 
-    ISwitch AlignS[1];
-    ISwitchVectorProperty AlignSP;
+  ISwitch AlignS[1];
+  ISwitchVectorProperty AlignSP;
 
-    IText VersionT[3];
-    ITextVectorProperty VersionTP;
+  IText VersionT[3];
+  ITextVectorProperty VersionTP;
 
-    bool m_manualSlew{ false };
+  bool m_manualSlew{false};
 
-    bool m_raAligned{ false };
-    bool m_decAligned{ false };
+  bool m_raAligned{false};
+  bool m_decAligned{false};
 
-    bool m_raSlewing{ false };
-    bool m_decSlewing{ false };
+  bool m_raSlewing{false};
+  bool m_decSlewing{false};
 
-    bool startAlign();
-    bool getDec();
-    bool getRA();
+  bool startAlign();
+  bool getDec();
+  bool getRA();
 
-    bool sendCmd(AUXCommand cmd);
-    bool readCmd(int timeout = 1);
-    bool handleCommand(AUXCommand cmd);
+  bool sendCmd(AUXCommand cmd);
+  bool readCmd(int timeout = 1);
+  bool handleCommand(AUXCommand cmd);
 
-    void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
-                                TelescopePierSide &pierSide);
+  void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
+                              TelescopePierSide &pierSide);
 
-    void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
-                                TelescopePierSide &pierSide);
+  void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
+                              TelescopePierSide &pierSide);
 
-    double hourAngleFromEncoder(uint32_t raSteps);
-    uint32_t encoderFromHourAngle(double hourAngle);
+  double hourAngleFromEncoder(uint32_t raSteps);
+  uint32_t encoderFromHourAngle(double hourAngle);
 
-    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide);
-    uint32_t encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide);
+  void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide);
+  uint32_t encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide);
 };

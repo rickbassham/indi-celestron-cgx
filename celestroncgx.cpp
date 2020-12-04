@@ -95,12 +95,6 @@ bool CelestronCGX::initProperties()
     /* Make sure to init parent properties first */
     INDI::Telescope::initProperties();
 
-    /* How fast do we guide compared to sidereal rate */
-    IUFillNumber(&GuideRateN[AXIS_RA], "GUIDE_RATE_WE", "W/E Rate", "%g", 0, 1, 0.1, 0.5);
-    IUFillNumber(&GuideRateN[AXIS_DE], "GUIDE_RATE_NS", "N/S Rate", "%g", 0, 1, 0.1, 0.5);
-    IUFillNumberVector(&GuideRateNP, GuideRateN, 2, getDeviceName(), "GUIDE_RATE", "Guiding Rate", MOTION_TAB, IP_RW, 0,
-                       IPS_IDLE);
-
     IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%f", 0, STEPS_PER_REVOLUTION - 1, 1,
                  STEPS_PER_REVOLUTION / 2);
     IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%f", 0, STEPS_PER_REVOLUTION - 1,
@@ -126,7 +120,12 @@ bool CelestronCGX::initProperties()
     // Use the HA to park, as it is constant for a given mount orientation.
     SetParkDataType(PARK_HA_DEC);
 
-    initGuiderProperties(getDeviceName(), MOTION_TAB);
+    initGuiderProperties(getDeviceName(), GUIDE_TAB);
+    /* How fast do we guide compared to sidereal rate */
+    IUFillNumber(&GuideRateN[AXIS_RA], "GUIDE_RATE_WE", "W/E Rate", "%.0f", 10, 100, 1, 50);
+    IUFillNumber(&GuideRateN[AXIS_DE], "GUIDE_RATE_NS", "N/S Rate", "%.0f", 10, 100, 1, 50);
+    IUFillNumberVector(&GuideRateNP, GuideRateN, 2, getDeviceName(), "GUIDE_RATE", "Guiding Rate", GUIDE_TAB, IP_RW, 0,
+                       IPS_IDLE);
 
     /* Add debug controls so we may debug driver if necessary */
     addDebugControl();
@@ -203,14 +202,23 @@ bool CelestronCGX::ISNewNumber(const char *dev, const char *name, double values[
             IUUpdateNumber(&GuideRateNP, values, names, n);
             GuideRateNP.s = IPS_OK;
             IDSetNumber(&GuideRateNP, nullptr);
+
+            uint8_t ra = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 256 / 100, 255.0));
+            uint8_t dec = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 256 / 100, 255.0));
+
+            buffer raData(1);
+            raData[0] = ra;
+
+            buffer decData(1);
+            decData[0] = dec;
+
+            sendCmd(AUXCommand(MC_SET_AUTOGUIDE_RATE, ANY, RA, raData));
+            sendCmd(AUXCommand(MC_SET_AUTOGUIDE_RATE, ANY, DEC, decData));
+
             return true;
         }
 
-        if (strcmp(name, GuideNSNP.name) == 0 || strcmp(name, GuideWENP.name) == 0)
-        {
-            processGuiderProperties(name, values, names, n);
-            return true;
-        }
+        processGuiderProperties(name, values, names, n);
     }
 
     //  if we didn't process it, continue up the chain, let somebody else
@@ -372,11 +380,9 @@ bool CelestronCGX::readCmd(int timeout)
 
     if (timeout == 0)
     {
-        LOG_INFO("found something with timeout 0");
+        // we found something, so make sure to set the timeout back to something reasonable
+        timeout = 1;
     }
-
-    // we found something, so make sure to set the timeout back to something reasonable
-    timeout = 1;
 
     // Found the start of a packet, now read the length.
     success = tty_read(PortFD, (char *)(buf + 1), 1, timeout, &n) == TTY_OK;
@@ -474,9 +480,41 @@ bool CelestronCGX::handleCommand(AUXCommand cmd)
             m_raSlewing = cmd.data[0] == 0x00;
         }
         return true;
+    case MC_GET_AUTOGUIDE_RATE:
+        if (cmd.src == DEC)
+        {
+            GuideRateN[AXIS_DE].value = cmd.data[0] * 100.0 / 255;
+        }
+        else if (cmd.src == RA)
+        {
+            GuideRateN[AXIS_RA].value = cmd.data[0] * 100.0 / 255;
+        }
+        IDSetNumber(&GuideRateNP, nullptr);
+
+        return true;
+    case MC_SET_AUTOGUIDE_RATE:
+        return true;
+    case MC_AUX_GUIDE:
+        return true;
+    case MC_AUX_GUIDE_ACTIVE:
+        if (cmd.src == DEC)
+        {
+            if (cmd.data[0] == 0)
+            {
+                GuideComplete(AXIS_DE);
+            }
+        }
+        else if (cmd.src == RA)
+        {
+            if (cmd.data[0] == 0)
+            {
+                GuideComplete(AXIS_RA);
+            }
+        }
+        return true;
     }
 
-    LOGF_ERROR("unknown command %x", cmd.cmd);
+    fprintf(stderr, "unknown command 0x%02x\n", cmd.cmd);
 
     buffer b;
     cmd.fillBuf(b);
@@ -521,6 +559,15 @@ bool CelestronCGX::ReadScopeStatus()
 
     getDec();
     getRA();
+
+    sendCmd(AUXCommand(MC_GET_AUTOGUIDE_RATE, ANY, RA));
+    sendCmd(AUXCommand(MC_GET_AUTOGUIDE_RATE, ANY, DEC));
+
+    if (GuideNSNP.s == IPS_BUSY)
+    {
+        sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, RA));
+        sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, DEC));
+    }
 
     if (AlignSP.s == IPS_BUSY)
     {
@@ -899,26 +946,6 @@ bool CelestronCGX::MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command)
     return sendCmd(AUXCommand(dir == DIRECTION_WEST ? MC_MOVE_POS : MC_MOVE_NEG, ANY, RA, dat));
 }
 
-IPState CelestronCGX::GuideNorth(uint32_t ms)
-{
-    return IPS_BUSY;
-}
-
-IPState CelestronCGX::GuideSouth(uint32_t ms)
-{
-    return IPS_BUSY;
-}
-
-IPState CelestronCGX::GuideEast(uint32_t ms)
-{
-    return IPS_BUSY;
-}
-
-IPState CelestronCGX::GuideWest(uint32_t ms)
-{
-    return IPS_BUSY;
-}
-
 bool CelestronCGX::saveConfigItems(FILE *fp)
 {
     INDI::Telescope::saveConfigItems(fp);
@@ -1031,4 +1058,74 @@ void CelestronCGX::RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, d
 
     ra = range24(ra);
     dec = rangeDec(dec);
+}
+
+// Autoguiding
+
+IPState CelestronCGX::GuideNorth(uint32_t ms)
+{
+    LOGF_DEBUG("Guiding: N %.0f ms", ms);
+
+    uint8_t ticks = std::min(uint32_t(255), ms / 10);
+
+    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 256 / 100, 255.0));
+
+    buffer data(2);
+    data[0] = rate;
+    data[1] = ticks;
+
+    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
+
+    return IPS_BUSY;
+}
+
+IPState CelestronCGX::GuideSouth(uint32_t ms)
+{
+    LOGF_DEBUG("Guiding: S %.0f ms", ms);
+
+    uint8_t ticks = std::min(uint32_t(255), ms / 10);
+
+    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 256 / 100, 255.0));
+
+    buffer data(2);
+    data[0] = rate;
+    data[1] = -ticks;
+
+    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
+
+    return IPS_BUSY;
+}
+
+IPState CelestronCGX::GuideEast(uint32_t ms)
+{
+    LOGF_DEBUG("Guiding: E %.0f ms", ms);
+
+    uint8_t ticks = std::min(uint32_t(255), ms / 10);
+
+    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 256 / 100, 255.0));
+
+    buffer data(2);
+    data[0] = rate;
+    data[1] = -ticks;
+
+    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
+
+    return IPS_BUSY;
+}
+
+IPState CelestronCGX::GuideWest(uint32_t ms)
+{
+    LOGF_DEBUG("Guiding: W %.0f ms", ms);
+
+    uint8_t ticks = std::min(uint32_t(255), ms / 10);
+
+    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 256 / 100, 255.0));
+
+    buffer data(2);
+    data[0] = rate;
+    data[1] = ticks;
+
+    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
+
+    return IPS_BUSY;
 }

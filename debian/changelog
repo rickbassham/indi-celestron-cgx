@@ -1,3 +1,9 @@
+indi-celestron-cgx (0.2) focal; urgency=low
+
+  * Add autoguiding support
+
+ -- Jasem Mutlaq <mutlaqja@ikarustech.com>  Wed, 23 Sep 2020 11:46:00 +0300
+
 indi-celestron-cgx (0.1) focal; urgency=low
 
   * Initial Release
