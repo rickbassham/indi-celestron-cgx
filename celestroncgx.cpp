@@ -70,12 +70,9 @@ void ISSnoopDevice(XMLEle *root)
 }
 
 const uint32_t CelestronCGX::STEPS_PER_REVOLUTION = 0x1000000;
-const uint32_t CelestronCGX::STEPS_AT_HOME_POSITION = 0x800000;
 const double CelestronCGX::STEPS_PER_DEGREE = STEPS_PER_REVOLUTION / 360.0;
-const double CelestronCGX::STEPS_PER_HOUR = STEPS_PER_REVOLUTION / 24.0;
-const double CelestronCGX::DEFAULT_SLEW_RATE = STEPS_PER_DEGREE * 4.0;
 
-CelestronCGX::CelestronCGX()
+CelestronCGX::CelestronCGX() : m_alignment(STEPS_PER_REVOLUTION)
 {
     setVersion(CCGX_VERSION_MAJOR, CCGX_VERSION_MINOR);
 
@@ -96,9 +93,9 @@ bool CelestronCGX::initProperties()
     INDI::Telescope::initProperties();
 
     IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%.0f", 0, STEPS_PER_REVOLUTION - 1, 1,
-                 STEPS_PER_REVOLUTION / 2);
+                 m_alignment.GetStepsAtHomePositionRA());
     IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%.0f", 0, STEPS_PER_REVOLUTION - 1,
-                 1, STEPS_PER_REVOLUTION / 2);
+                 1, m_alignment.GetStepsAtHomePositionDec());
     IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS", "Encoder Ticks",
                        MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
 
@@ -409,14 +406,18 @@ bool CelestronCGX::handleCommand(AUXCommand cmd)
     case MC_GET_POSITION:
         if (cmd.src == DEC)
         {
-            EncoderTicksN[AXIS_DE].value = cmd.getPosition();
+            uint32_t steps = cmd.getPosition();
+            EncoderTicksN[AXIS_DE].value = steps;
+            m_alignment.UpdateStepsDec(steps);
         }
         else if (cmd.src == RA)
         {
-            EncoderTicksN[AXIS_RA].value = cmd.getPosition();
+            uint32_t steps = cmd.getPosition();
+            EncoderTicksN[AXIS_RA].value = steps;
+            m_alignment.UpdateStepsRA(steps);
 
-            LocationDebugN[0].value = hourAngleFromEncoder(EncoderTicksN[AXIS_RA].value);
-            LocationDebugN[1].value = get_local_sidereal_time(lnobserver.lng);
+            LocationDebugN[0].value = m_alignment.hourAngleFromEncoder();
+            LocationDebugN[1].value = m_alignment.localSiderealTime();
 
             IDSetNumber(&LocationDebugNP, nullptr);
         }
@@ -543,8 +544,12 @@ bool CelestronCGX::ReadScopeStatus()
 
     if (GuideNSNP.s == IPS_BUSY)
     {
-        sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, RA));
         sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, DEC));
+    }
+
+    if (GuideWENP.s == IPS_BUSY)
+    {
+        sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, RA));
     }
 
     if (AlignSP.s == IPS_BUSY)
@@ -561,11 +566,11 @@ bool CelestronCGX::ReadScopeStatus()
             usleep(1000 * 500); // 500ms
 
             AUXCommand raCmd(MC_SET_POSITION, ANY, RA);
-            raCmd.setPosition(long(0x800000));
+            raCmd.setPosition(m_alignment.GetStepsAtHomePositionRA());
             sendCmd(raCmd);
 
             AUXCommand decCmd(MC_SET_POSITION, ANY, DEC);
-            decCmd.setPosition(long(0x800000));
+            decCmd.setPosition(m_alignment.GetStepsAtHomePositionDec());
             sendCmd(decCmd);
 
             SetTrackEnabled(false);
@@ -610,17 +615,12 @@ bool CelestronCGX::ReadScopeStatus()
         }
     }
 
-    TelescopePierSide pierSide;
+    EQAlignment::TelescopePierSide pierSide;
     double ra, dec;
 
-    uint32_t raSteps, decSteps;
+    m_alignment.RADecFromEncoderValues(ra, dec, pierSide);
 
-    raSteps = EncoderTicksN[AXIS_RA].value;
-    decSteps = EncoderTicksN[AXIS_DE].value;
-
-    RADecFromEncoderValues(raSteps, decSteps, ra, dec, pierSide);
-
-    setPierSide(pierSide);
+    setPierSide(static_cast<TelescopePierSide>(pierSide));
     NewRaDec(ra, dec);
 
     return true;
@@ -672,7 +672,7 @@ bool CelestronCGX::Park()
     double hourAngle = GetAxis1Park();
     double dec = GetAxis2Park();
 
-    double lst = get_local_sidereal_time(lnobserver.lng);
+    double lst = m_alignment.localSiderealTime();
     double ra = lst - hourAngle;
 
     StartSlew(ra, dec, SCOPE_PARKING);
@@ -738,17 +738,12 @@ bool CelestronCGX::SetTrackEnabled(bool enabled)
 
 bool CelestronCGX::SetCurrentPark()
 {
-    TelescopePierSide pierSide;
+    EQAlignment::TelescopePierSide pierSide;
     double ra, dec;
 
-    uint32_t raSteps, decSteps;
+    m_alignment.RADecFromEncoderValues(ra, dec, pierSide);
 
-    raSteps = EncoderTicksN[AXIS_RA].value;
-    decSteps = EncoderTicksN[AXIS_DE].value;
-
-    RADecFromEncoderValues(raSteps, decSteps, ra, dec, pierSide);
-
-    double lst = get_local_sidereal_time(lnobserver.lng);
+    double lst = m_alignment.localSiderealTime();
     double hourAngle = lst - ra;
 
     if (pierSide == PIER_WEST)
@@ -780,11 +775,12 @@ bool CelestronCGX::SetParkPosition(double Axis1Value, double Axis2Value)
 
 bool CelestronCGX::Sync(double ra, double dec)
 {
-    TelescopePierSide pierSide;
+    EQAlignment::TelescopePierSide pierSide;
     uint32_t raSteps, decSteps;
 
-    EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
-    setPierSide(pierSide);
+    m_alignment.EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
+
+    setPierSide(static_cast<TelescopePierSide>(pierSide));
 
     AUXCommand raCmd(MC_SET_POSITION, ANY, RA);
     raCmd.setPosition(raSteps);
@@ -799,9 +795,6 @@ bool CelestronCGX::Sync(double ra, double dec)
     // Be sure to update our local status.
     getDec();
     getRA();
-
-    LOGF_INFO("sync: stepsRa %d; stepsDec %d;", long(EncoderTicksN[AXIS_RA].value),
-              long(EncoderTicksN[AXIS_DE].value));
 
     return true;
 }
@@ -824,10 +817,10 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status)
     RememberTrackState = TrackState;
     TrackState = status;
 
-    TelescopePierSide pierSide;
+    EQAlignment::TelescopePierSide pierSide;
     uint32_t raSteps, decSteps;
 
-    EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
+    m_alignment.EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
 
     double currentRASteps = EncoderTicksN[AXIS_RA].value;
     double currentDecSteps = EncoderTicksN[AXIS_DE].value;
@@ -949,111 +942,12 @@ bool CelestronCGX::updateLocation(double latitude, double longitude, double elev
 {
     LOGF_INFO("Update location %8.3f, %8.3f, %4.0f", latitude, longitude, elevation);
 
+    m_alignment.UpdateLongitude(longitude);
+
     return true;
 }
 
 /////////////////////////////////////////////////////////////////////
-
-void CelestronCGX::EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
-                                          TelescopePierSide &pierSide)
-{
-    pierSide = expectedPierSide(ra);
-
-    // Inverse of RADecFromEncoderValues
-    double lst = get_local_sidereal_time(lnobserver.lng);
-    double hourAngle = lst - ra;
-
-    if (pierSide == PIER_WEST)
-    {
-        hourAngle -= 12.0;
-    }
-
-    raSteps = encoderFromHourAngle(hourAngle);
-    decSteps = encoderFromDecAndPierSide(dec, pierSide);
-}
-
-double CelestronCGX::hourAngleFromEncoder(uint32_t raSteps)
-{
-    double hourAngle;
-    if (raSteps > STEPS_AT_HOME_POSITION)
-    {
-        hourAngle = 6.0 + ((raSteps - STEPS_AT_HOME_POSITION) / STEPS_PER_HOUR);
-    }
-    else
-    {
-        hourAngle = 6.0 - ((STEPS_AT_HOME_POSITION - raSteps) / STEPS_PER_HOUR);
-    }
-
-    return hourAngle;
-}
-
-uint32_t CelestronCGX::encoderFromHourAngle(double hourAngle)
-{
-    uint32_t steps;
-
-    if (hourAngle > 6.0)
-    {
-        steps = ((hourAngle - 6.0) * STEPS_PER_HOUR) + STEPS_AT_HOME_POSITION;
-    }
-    else
-    {
-        steps = STEPS_AT_HOME_POSITION - ((6.0 - hourAngle) * STEPS_PER_HOUR);
-    }
-
-    steps %= STEPS_PER_REVOLUTION;
-
-    return steps;
-}
-
-uint32_t CelestronCGX::encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide)
-{
-    uint32_t stepsOffsetFromNinety = (90.0 - dec) * STEPS_PER_DEGREE;
-
-    if (pierSide == PIER_WEST)
-    {
-        return STEPS_AT_HOME_POSITION - stepsOffsetFromNinety;
-    }
-    else
-    {
-        return STEPS_AT_HOME_POSITION + stepsOffsetFromNinety;
-    }
-}
-
-void CelestronCGX::decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide)
-{
-    double degreesOffsetFromHome = 0.0;
-    if (decSteps > STEPS_AT_HOME_POSITION)
-    {
-        degreesOffsetFromHome = (decSteps - STEPS_AT_HOME_POSITION) / STEPS_PER_DEGREE;
-        pierSide = PIER_EAST;
-    }
-    else
-    {
-        degreesOffsetFromHome = (STEPS_AT_HOME_POSITION - decSteps) / STEPS_PER_DEGREE;
-        pierSide = PIER_WEST;
-    }
-
-    dec = 90.0 - degreesOffsetFromHome;
-}
-
-void CelestronCGX::RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
-                                          TelescopePierSide &pierSide)
-{
-    double hourAngle = hourAngleFromEncoder(raSteps);
-    double lst = get_local_sidereal_time(lnobserver.lng);
-    ra = lst - hourAngle;
-
-    decAndPierSideFromEncoder(decSteps, dec, pierSide);
-
-    if (pierSide == PIER_WEST)
-    {
-        ra = ra - 12.0;
-    }
-
-    ra = range24(ra);
-    dec = rangeDec(dec);
-}
-
 // Autoguiding
 
 IPState CelestronCGX::GuideNorth(uint32_t ms)

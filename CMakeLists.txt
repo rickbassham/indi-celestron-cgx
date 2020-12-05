@@ -26,7 +26,7 @@ include_directories( ${EV_INCLUDE_DIR})
 
 include(CMakeCommon)
 
-add_executable(indi_celestron_cgx auxproto.cpp celestroncgx.cpp)
+add_executable(indi_celestron_cgx auxproto.cpp celestroncgx.cpp simplealignment.cpp)
 target_link_libraries(indi_celestron_cgx ${INDI_LIBRARIES} ${NOVA_LIBRARIES} ${GSL_LIBRARIES})
 install(TARGETS indi_celestron_cgx RUNTIME DESTINATION bin)
 

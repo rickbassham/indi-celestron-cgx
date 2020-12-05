@@ -23,6 +23,7 @@
 #include <libindi/connectionplugins/connectionserial.h>
 
 #include "auxproto.h"
+#include "simplealignment.h"
 
 /**
  * @brief The CelestronCGX class provides a simple mount simulator of an equatorial mount.
@@ -90,10 +91,7 @@ protected:
 
 private:
   static const uint32_t STEPS_PER_REVOLUTION;
-  static const uint32_t STEPS_AT_HOME_POSITION;
   static const double STEPS_PER_DEGREE;
-  static const double STEPS_PER_HOUR;
-  static const double DEFAULT_SLEW_RATE;
 
   /// used by GoTo and Park
   void StartSlew(double ra, double dec, TelescopeStatus status);
@@ -131,15 +129,5 @@ private:
   bool readCmd(int timeout = 1);
   bool handleCommand(AUXCommand cmd);
 
-  void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
-                              TelescopePierSide &pierSide);
-
-  void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
-                              TelescopePierSide &pierSide);
-
-  double hourAngleFromEncoder(uint32_t raSteps);
-  uint32_t encoderFromHourAngle(double hourAngle);
-
-  void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide);
-  uint32_t encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide);
+  EQAlignment m_alignment;
 };

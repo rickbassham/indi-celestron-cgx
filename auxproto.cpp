@@ -300,7 +300,6 @@ long AUXCommand::getPosition()
 
 void AUXCommand::setPosition(uint32_t p)
 {
-    //int a=(int)p; fprintf(stderr,"Angle: %08x = %d => %f\n", a, a, a/pow(2,24));
     data.resize(3);
     // Fold the value to 0-STEPS_PER_REVOLUTION range
     if (p < 0)
@@ -308,6 +307,7 @@ void AUXCommand::setPosition(uint32_t p)
         p += STEPS_PER_REVOLUTION;
     }
     p = p % STEPS_PER_REVOLUTION;
+
     for (int i = 2; i > -1; i--)
     {
         data[i] = (unsigned char)(p & 0xff);
