@@ -81,7 +81,7 @@ CelestronCGX::CelestronCGX()
 
     SetTelescopeCapability(TELESCOPE_CAN_PARK | TELESCOPE_CAN_SYNC | TELESCOPE_CAN_GOTO | TELESCOPE_CAN_ABORT |
                                TELESCOPE_HAS_TIME | TELESCOPE_HAS_LOCATION | TELESCOPE_HAS_TRACK_MODE |
-                               TELESCOPE_CAN_CONTROL_TRACK | TELESCOPE_HAS_PIER_SIDE | TELESCOPE_HAS_PEC,
+                               TELESCOPE_CAN_CONTROL_TRACK | TELESCOPE_HAS_PIER_SIDE,
                            4);
 }
 
@@ -95,9 +95,9 @@ bool CelestronCGX::initProperties()
     /* Make sure to init parent properties first */
     INDI::Telescope::initProperties();
 
-    IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%f", 0, STEPS_PER_REVOLUTION - 1, 1,
+    IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%.0f", 0, STEPS_PER_REVOLUTION - 1, 1,
                  STEPS_PER_REVOLUTION / 2);
-    IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%f", 0, STEPS_PER_REVOLUTION - 1,
+    IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%.0f", 0, STEPS_PER_REVOLUTION - 1,
                  1, STEPS_PER_REVOLUTION / 2);
     IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS", "Encoder Ticks",
                        MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
@@ -1073,11 +1073,13 @@ IPState CelestronCGX::GuideNorth(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 256 / 100, 255.0));
+    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 128 / 100, 255.0));
 
     buffer data(2);
     data[0] = rate;
     data[1] = ticks;
+
+    LOGF_INFO("n %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
 
@@ -1090,11 +1092,13 @@ IPState CelestronCGX::GuideSouth(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 256 / 100, 255.0));
+    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 128 / 100, 255.0));
 
     buffer data(2);
-    data[0] = rate;
-    data[1] = -ticks;
+    data[0] = -rate;
+    data[1] = ticks;
+
+    LOGF_INFO("s %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
 
@@ -1107,11 +1111,13 @@ IPState CelestronCGX::GuideEast(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 256 / 100, 255.0));
+    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 128 / 100, 255.0));
 
     buffer data(2);
-    data[0] = rate;
-    data[1] = -ticks;
+    data[0] = -rate;
+    data[1] = ticks;
+
+    LOGF_INFO("e %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
 
@@ -1124,11 +1130,13 @@ IPState CelestronCGX::GuideWest(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    uint8_t rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 256 / 100, 255.0));
+    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 128 / 100, 255.0));
 
     buffer data(2);
     data[0] = rate;
     data[1] = ticks;
+
+    LOGF_INFO("w %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
 
