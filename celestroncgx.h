@@ -20,6 +20,7 @@
 
 #include <libindi/indiguiderinterface.h>
 #include <libindi/inditelescope.h>
+#include <libindi/connectionplugins/connectionserial.h>
 
 #include "auxproto.h"
 
@@ -33,8 +34,9 @@
  * + Tracking On/Off.
  * + Parking & Unparking with custom parking positions.
  * + Setting Time & Location.
+ * + Autoguiding
  *
- * On startup and by default the mount shall point to the celestial pole.
+ * On startup and by default the mount shall point to the celestial pole, counterweight down.
  *
  * @author Rick Bassham
  */

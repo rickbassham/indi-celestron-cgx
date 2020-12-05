@@ -137,6 +137,8 @@ bool CelestronCGX::initProperties()
 
     setDriverInterface(getDriverInterface() | GUIDER_INTERFACE);
 
+    serialConnection->setDefaultBaudRate(Connection::Serial::BaudRate::B_115200);
+
     setDefaultPollingPeriod(250);
 
     return true;
@@ -1060,13 +1062,11 @@ IPState CelestronCGX::GuideNorth(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 128 / 100, 255.0));
+    int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_DE].value);
 
     buffer data(2);
     data[0] = rate;
     data[1] = ticks;
-
-    LOGF_INFO("n %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
 
@@ -1079,13 +1079,11 @@ IPState CelestronCGX::GuideSouth(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 128 / 100, 255.0));
+    int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_DE].value);
 
     buffer data(2);
     data[0] = -rate;
     data[1] = ticks;
-
-    LOGF_INFO("s %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
 
@@ -1098,13 +1096,11 @@ IPState CelestronCGX::GuideEast(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 128 / 100, 255.0));
+    int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_RA].value);
 
     buffer data(2);
     data[0] = -rate;
     data[1] = ticks;
-
-    LOGF_INFO("e %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
 
@@ -1117,13 +1113,11 @@ IPState CelestronCGX::GuideWest(uint32_t ms)
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
-    signed char rate = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 128 / 100, 255.0));
+    int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_RA].value);
 
     buffer data(2);
     data[0] = rate;
     data[1] = ticks;
-
-    LOGF_INFO("w %d %d %d", ms, data[0], data[1]);
 
     sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
 
