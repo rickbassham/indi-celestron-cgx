@@ -111,6 +111,8 @@ private:
   IText VersionT[3];
   ITextVectorProperty VersionTP;
 
+  uint8_t slewRate();
+
   bool m_manualSlew{false};
 
   bool m_raAligned{false};

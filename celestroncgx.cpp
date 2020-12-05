@@ -834,20 +834,20 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status)
 
     if (uint32_t(currentRASteps) > raSteps)
     {
-        raClose = (uint32_t(currentRASteps) - raSteps) < STEPS_PER_DEGREE * 2;
+        raClose = (uint32_t(currentRASteps) - raSteps) < STEPS_PER_DEGREE * 4;
     }
     else
     {
-        raClose = (raSteps - uint32_t(currentRASteps)) < STEPS_PER_DEGREE * 2;
+        raClose = (raSteps - uint32_t(currentRASteps)) < STEPS_PER_DEGREE * 4;
     }
 
     if (uint32_t(currentDecSteps) > decSteps)
     {
-        decClose = (uint32_t(currentDecSteps) - decSteps) < STEPS_PER_DEGREE * 2;
+        decClose = (uint32_t(currentDecSteps) - decSteps) < STEPS_PER_DEGREE * 4;
     }
     else
     {
-        decClose = (decSteps - uint32_t(currentDecSteps)) < STEPS_PER_DEGREE * 2;
+        decClose = (decSteps - uint32_t(currentDecSteps)) < STEPS_PER_DEGREE * 4;
     }
 
     AUXCommands cmd = raClose && decClose ? MC_GOTO_SLOW : MC_GOTO_FAST;
@@ -863,6 +863,25 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status)
     m_manualSlew = false;
 
     LOGF_INFO("%s to %f %f %d", statusStr, ra, dec, cmd);
+}
+
+uint8_t CelestronCGX::slewRate()
+{
+    int index = IUFindOnSwitchIndex(&SlewRateSP);
+
+    switch (index)
+    {
+    case SLEW_GUIDE:
+        return GUIDE_SLEW_RATE;
+    case SLEW_CENTERING:
+        return CENTERING_SLEW_RATE;
+    case SLEW_FIND:
+        return FIND_SLEW_RATE;
+    case SLEW_MAX:
+        return MAX_SLEW_RATE;
+    }
+
+    return FIND_SLEW_RATE;
 }
 
 bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
@@ -886,23 +905,7 @@ bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
 
     TrackState = SCOPE_SLEWING;
 
-    int index = IUFindOnSwitchIndex(&SlewRateSP);
-
-    switch (index)
-    {
-    case SLEW_GUIDE:
-        dat[0] = GUIDE_SLEW_RATE;
-        break;
-    case SLEW_CENTERING:
-        dat[0] = CENTERING_SLEW_RATE;
-        break;
-    case SLEW_FIND:
-        dat[0] = FIND_SLEW_RATE;
-        break;
-    case SLEW_MAX:
-        dat[0] = MAX_SLEW_RATE;
-        break;
-    }
+    dat[0] = slewRate();
 
     return sendCmd(AUXCommand(dir == DIRECTION_NORTH ? MC_MOVE_NEG : MC_MOVE_POS, ANY, DEC, dat));
 }
@@ -928,23 +931,7 @@ bool CelestronCGX::MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command)
 
     TrackState = SCOPE_SLEWING;
 
-    int index = IUFindOnSwitchIndex(&SlewRateSP);
-
-    switch (index)
-    {
-    case SLEW_GUIDE:
-        dat[0] = GUIDE_SLEW_RATE;
-        break;
-    case SLEW_CENTERING:
-        dat[0] = CENTERING_SLEW_RATE;
-        break;
-    case SLEW_FIND:
-        dat[0] = FIND_SLEW_RATE;
-        break;
-    case SLEW_MAX:
-        dat[0] = MAX_SLEW_RATE;
-        break;
-    }
+    dat[0] = slewRate();
 
     return sendCmd(AUXCommand(dir == DIRECTION_WEST ? MC_MOVE_POS : MC_MOVE_NEG, ANY, RA, dat));
 }
