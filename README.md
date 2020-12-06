@@ -22,6 +22,9 @@ sudo apt install libindi-dev libnova-dev libz-dev libgsl-dev
 ```
 
 ```sh
+mkdir -p ~/Projects
+cd ~/Projects
+git clone https://github.com/rickbassham/indi-celestron-cgx.git
 mkdir -p ~/Projects/build/indi-celestron-cgx
 cd ~/Projects/build/indi-celestron-cgx
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug ~/Projects/indi-celestron-cgx
