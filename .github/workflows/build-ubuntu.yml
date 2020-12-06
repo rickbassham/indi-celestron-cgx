@@ -4,11 +4,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ubuntu:
+  build-ubuntu-amd64:
     strategy:
       matrix:
-        arch: [linux/amd64, linux/arm64]
-        os: ["20.04", "18.04", "16.04"]
+        os: ["groovy", "focal", "bionic", "xenial"]
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
@@ -26,18 +25,57 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile
+          file: ./ubuntu-amd64.Dockerfile
           load: true
-          platforms: ${{matrix.arch}}
-          tags: cgx-build:latest
+          tags: cgx-build-ubuntu-amd64:${{ matrix.os }}
           build-args: |
             UBUNTU_VERSION=${{ matrix.os }}
       - name: Build Package
         run: |
-          docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'fakeroot-tcp debian/rules binary && cp ../*.deb /output'
+          docker run --rm -v `pwd`:/output cgx-build-ubuntu-amd64:${{ matrix.os }} /bin/bash -c 'fakeroot-tcp debian/rules binary && cp ../*.deb /output'
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: debs-ubuntu-${{matrix.os}}
+          name: debs-ubuntu-amd64-${{matrix.os}}
           path: |
             *.deb
+  # build-ubuntu-arm64:
+  #   strategy:
+  #     matrix:
+  #       os: ["focal", "bionic", "xenial"]
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v1
+  #     - name: Docker Setup Buildx
+  #       uses: docker/setup-buildx-action@v1.0.3
+  #       id: buildx
+  #       with:
+  #         install: true
+  #     - name: Available platforms
+  #       run: echo ${{ steps.buildx.outputs.platforms }}
+  #     - name: Get Base Dockerfile
+  #       run: |
+  #         wget https://raw.githubusercontent.com/balena-io-library/base-images/master/balena-base-images/device-base/raspberrypi4-64/ubuntu/${{ matrix.os }}/run/Dockerfile -O raspberrypi-64-ubuntu-${{ matrix.os }}-run.Dockerfile
+  #         docker buildx build --load --tag raspberrypi-64-ubuntu-run:${{ matrix.os }} -f raspberrypi-64-ubuntu-${{ matrix.os }}-run.Dockerfile .
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Build the builder
+  #       uses: docker/build-push-action@v2
+  #       with:
+  #         context: .
+  #         file: ./Dockerfile
+  #         load: true
+  #         tags: cgx-build-ubuntu-arm64:${{ matrix.os }}
+  #         build-args: |
+  #           BASE_IMAGE=raspberrypi-64-ubuntu-run
+  #           UBUNTU_VERSION=${{ matrix.os }}
+  #     - name: Build Package
+  #       run: |
+  #         docker run --rm -v `pwd`:/output cgx-build-ubuntu-arm64:${{ matrix.os }} /bin/bash -c 'cross-build-start && fakeroot-tcp debian/rules binary && cp ../*.deb /output && cross-build-end'
+  #     - name: Archive production artifacts
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: debs-ubuntu-arm64-${{matrix.os}}
+  #         path: |
+  #           *.deb

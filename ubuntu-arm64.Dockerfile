@@ -1,18 +1,19 @@
-ARG UBUNTU_VERSION=20.04
-FROM ubuntu:${UBUNTU_VERSION}
+ARG UBUNTU_VERSION=focal
+ARG BASE_IMAGE=balenalib/raspberrypi4-64-ubuntu
+FROM ${BASE_IMAGE}:${UBUNTU_VERSION}
+
+RUN [ "cross-build-start" ]
 
 ARG DEBIAN_FRONTEND="noninteractive"
 ENV TZ=America/New_York
 
-RUN apt-get update && apt-get install -y \
-    build-essential devscripts debhelper fakeroot cdbs software-properties-common cmake \
-    && rm -rf /var/lib/apt/lists/*
+RUN install_packages \
+    build-essential devscripts debhelper fakeroot cdbs software-properties-common cmake wget
 
 RUN add-apt-repository ppa:mutlaqja/ppa
 
-RUN apt-get update && apt-get install -y \
-    libindi-dev libnova-dev libz-dev libgsl-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN install_packages \
+    libindi-dev libnova-dev libz-dev libgsl-dev
 
 RUN mkdir -p /src/indi-celestron-cgx
 WORKDIR /src/indi-celestron-cgx
@@ -24,3 +25,5 @@ WORKDIR /build/deb-indi-celestron-cgx
 
 RUN cp -r /src/indi-celestron-cgx .
 RUN cp -r /src/indi-celestron-cgx/debian debian
+
+RUN [ "cross-build-end" ]

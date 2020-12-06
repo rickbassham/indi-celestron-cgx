@@ -20,7 +20,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./debian.Dockerfile
+          file: ./raspbian.Dockerfile
           load: true
           tags: cgx-build-raspbian:latest
       - name: Build Package
