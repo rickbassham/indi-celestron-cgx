@@ -42,33 +42,18 @@ jobs:
           path: |
             *.deb
   build-raspbian:
-    strategy:
-      matrix:
-        arch: [linux/arm/v7]
     runs-on: ubuntu-20.04
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v1.0.3
-        id: buildx
-        with:
-          install: true
-      - name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Build the builder
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./debian.Dockerfile
           load: true
-          platforms: ${{matrix.arch}}
           tags: cgx-build:latest
       - name: Build Package
         run: |
-          docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'fakeroot-tcp debian/rules binary && cp ../*.deb /output'
+          docker run --rm -v `pwd`:/output cgx-build /bin/bash -c 'cross-build-start && fakeroot-tcp debian/rules binary && cp ../*.deb /output && cross-build-end'
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
