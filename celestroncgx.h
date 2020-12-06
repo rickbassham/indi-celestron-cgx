@@ -94,7 +94,7 @@ private:
   static const double STEPS_PER_DEGREE;
 
   /// used by GoTo and Park
-  void StartSlew(double ra, double dec, TelescopeStatus status);
+  void StartSlew(double ra, double dec, TelescopeStatus status, bool skipPierSideCheck = false);
 
   INumber LocationDebugN[2];
   INumberVectorProperty LocationDebugNP;
@@ -120,6 +120,9 @@ private:
 
   bool m_raSlewing{false};
   bool m_decSlewing{false};
+
+  double *m_raTarget{nullptr};
+  double *m_decTarget{nullptr};
 
   bool startAlign();
   bool getDec();

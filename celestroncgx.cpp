@@ -242,9 +242,6 @@ bool CelestronCGX::ISNewSwitch(const char *dev, const char *name, ISState *state
             if (IUUpdateSwitch(&AlignSP, states, names, n) < 0)
                 return false;
 
-            AlignSP.s = IPS_BUSY;
-            IDSetSwitch(&AlignSP, nullptr);
-
             startAlign();
 
             return true;
@@ -504,6 +501,12 @@ bool CelestronCGX::handleCommand(AUXCommand cmd)
 
 bool CelestronCGX::startAlign()
 {
+    AlignSP.s = IPS_BUSY;
+    IDSetSwitch(&AlignSP, nullptr);
+
+    m_raAligned = false;
+    m_decAligned = false;
+
     if (!sendCmd(AUXCommand(MC_LEVEL_START, ANY, RA)))
     {
         LOG_ERROR("error starting align on az");
@@ -573,15 +576,35 @@ bool CelestronCGX::ReadScopeStatus()
             decCmd.setPosition(m_alignment.GetStepsAtHomePositionDec());
             sendCmd(decCmd);
 
+            AUXCommand wrapCmd(MC_SET_CORDWRAP_POS, ANY, RA);
+            wrapCmd.setPosition(m_alignment.encoderFromHourAngle(12.5));
+            sendCmd(wrapCmd);
+
+            TelescopeStatus state = TrackState;
+
             SetTrackEnabled(false);
 
             getDec();
             getRA();
 
-            LOG_INFO("CGX is now aligned");
             AlignSP.s = IPS_OK;
             AlignS[0].s = ISS_OFF;
             IDSetSwitch(&AlignSP, nullptr);
+
+            if (m_raTarget != nullptr && m_decTarget != nullptr)
+            {
+                // We are actually doing a slew to this target, so keep going.
+                StartSlew(*m_raTarget, *m_decTarget, state, true);
+
+                delete m_raTarget;
+                delete m_decTarget;
+                m_raTarget = nullptr;
+                m_decTarget = nullptr;
+            }
+            else
+            {
+                LOG_INFO("CGX is now aligned");
+            }
         }
     }
 
@@ -800,7 +823,7 @@ bool CelestronCGX::Sync(double ra, double dec)
 }
 
 // common code for GoTo and park
-void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status)
+void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool skipPierSideCheck)
 {
     const char *statusStr;
     switch (status)
@@ -821,6 +844,20 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status)
     uint32_t raSteps, decSteps;
 
     m_alignment.EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
+
+    if (!skipPierSideCheck && currentPierSide != static_cast<TelescopePierSide>(pierSide))
+    {
+        m_raTarget = new double(ra);
+        m_decTarget = new double(dec);
+
+        // Let's go back to home since we are changing pier sides.
+        // Takes a little longer to slew, but keeps things simple.
+
+        LOGF_INFO("%s to home, then to %f %f, %d, %d", statusStr, ra, dec, raSteps, decSteps);
+
+        startAlign();
+        return;
+    }
 
     double currentRASteps = EncoderTicksN[AXIS_RA].value;
     double currentDecSteps = EncoderTicksN[AXIS_DE].value;
@@ -857,7 +894,7 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status)
 
     m_manualSlew = false;
 
-    LOGF_INFO("%s to %f %f %d", statusStr, ra, dec, cmd);
+    LOGF_INFO("%s to %f %f %d, %d, %d", statusStr, ra, dec, cmd, raSteps, decSteps);
 }
 
 uint8_t CelestronCGX::slewRate()
