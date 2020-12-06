@@ -845,22 +845,30 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool
 
     m_alignment.EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
 
-    if (!skipPierSideCheck && currentPierSide != static_cast<TelescopePierSide>(pierSide))
-    {
-        m_raTarget = new double(ra);
-        m_decTarget = new double(dec);
-
-        // Let's go back to home since we are changing pier sides.
-        // Takes a little longer to slew, but keeps things simple.
-
-        LOGF_INFO("%s to home, then to %f %f, %d, %d", statusStr, ra, dec, raSteps, decSteps);
-
-        startAlign();
-        return;
-    }
-
     double currentRASteps = EncoderTicksN[AXIS_RA].value;
     double currentDecSteps = EncoderTicksN[AXIS_DE].value;
+
+    if (!skipPierSideCheck && currentPierSide != static_cast<TelescopePierSide>(pierSide))
+    {
+        // The mount will take the shortest distance to the new stepper count, so make sure we go
+        // through home if we would otherwise do something crazy do something crazy.
+
+        if (abs(raSteps - long(currentRASteps)) > STEPS_PER_REVOLUTION / 2 || abs(decSteps - long(currentDecSteps)) > STEPS_PER_REVOLUTION / 2)
+        {
+            // Yeah, that's a flip.
+
+            m_raTarget = new double(ra);
+            m_decTarget = new double(dec);
+
+            // Let's go back to home since we are changing pier sides.
+            // Takes a little longer to slew, but keeps things simple.
+
+            LOGF_INFO("%s to home, then to %f %f, %d, %d", statusStr, ra, dec, raSteps, decSteps);
+
+            startAlign();
+            return;
+        }
+    }
 
     bool raClose, decClose = false;
 
