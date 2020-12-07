@@ -1,6 +1,5 @@
 ARG UBUNTU_VERSION=focal
-ARG BASE_IMAGE=balenalib/raspberrypi4-64-ubuntu
-FROM ${BASE_IMAGE}:${UBUNTU_VERSION}
+FROM balenalib/aarch64-ubuntu:${UBUNTU_VERSION}-run
 
 RUN [ "cross-build-start" ]
 
