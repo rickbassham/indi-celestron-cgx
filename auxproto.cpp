@@ -302,10 +302,6 @@ void AUXCommand::setPosition(uint32_t p)
 {
     data.resize(3);
     // Fold the value to 0-STEPS_PER_REVOLUTION range
-    if (p < 0)
-    {
-        p += STEPS_PER_REVOLUTION;
-    }
     p = p % STEPS_PER_REVOLUTION;
 
     for (int i = 2; i > -1; i--)

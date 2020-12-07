@@ -488,6 +488,10 @@ bool CelestronCGX::handleCommand(AUXCommand cmd)
             }
         }
         return true;
+    case MC_SET_CORDWRAP_POS:
+        return true;
+    case MC_ENABLE_CORDWRAP:
+        return true;
     }
 
     fprintf(stderr, "unknown command 0x%02x\n", cmd.cmd);
@@ -577,8 +581,10 @@ bool CelestronCGX::ReadScopeStatus()
             sendCmd(decCmd);
 
             AUXCommand wrapCmd(MC_SET_CORDWRAP_POS, ANY, RA);
-            wrapCmd.setPosition(m_alignment.encoderFromHourAngle(12.5));
+            wrapCmd.setPosition(m_alignment.encoderFromHourAngle(13.0));
             sendCmd(wrapCmd);
+
+            sendCmd(AUXCommand(MC_ENABLE_CORDWRAP, ANY, RA));
 
             TelescopeStatus state = TrackState;
 
@@ -711,6 +717,13 @@ bool CelestronCGX::UnPark()
 
 bool CelestronCGX::SetTrackMode(uint8_t mode)
 {
+    INDI_UNUSED(mode);
+
+    if (TrackStateSP.s == IPS_BUSY)
+    {
+        return SetTrackEnabled(true);
+    }
+
     return true;
 }
 
@@ -769,7 +782,7 @@ bool CelestronCGX::SetCurrentPark()
     double lst = m_alignment.localSiderealTime();
     double hourAngle = lst - ra;
 
-    if (pierSide == PIER_WEST)
+    if (static_cast<TelescopePierSide>(pierSide) == PIER_WEST)
     {
         hourAngle -= 12.0;
     }
