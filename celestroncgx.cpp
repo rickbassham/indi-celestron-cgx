@@ -872,23 +872,8 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool
 
     bool raClose, decClose = false;
 
-    if (uint32_t(currentRASteps) > raSteps)
-    {
-        raClose = (uint32_t(currentRASteps) - raSteps) < STEPS_PER_DEGREE * 4;
-    }
-    else
-    {
-        raClose = (raSteps - uint32_t(currentRASteps)) < STEPS_PER_DEGREE * 4;
-    }
-
-    if (uint32_t(currentDecSteps) > decSteps)
-    {
-        decClose = (uint32_t(currentDecSteps) - decSteps) < STEPS_PER_DEGREE * 4;
-    }
-    else
-    {
-        decClose = (decSteps - uint32_t(currentDecSteps)) < STEPS_PER_DEGREE * 4;
-    }
+    raClose = std::abs(long(raSteps) - long(currentRASteps)) < long(STEPS_PER_DEGREE * 4);
+    decClose = std::abs(long(decSteps) - long(currentDecSteps)) < long(STEPS_PER_DEGREE * 4);
 
     AUXCommands cmd = raClose && decClose ? MC_GOTO_SLOW : MC_GOTO_FAST;
 
