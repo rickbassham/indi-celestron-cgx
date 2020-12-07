@@ -853,14 +853,13 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool
         // The mount will take the shortest distance to the new stepper count, so make sure we go
         // through home if we would otherwise do something crazy do something crazy.
 
-        if (abs(raSteps - long(currentRASteps)) > STEPS_PER_REVOLUTION / 2 || abs(decSteps - long(currentDecSteps)) > STEPS_PER_REVOLUTION / 2)
+        if (std::abs(long(raSteps) - long(currentRASteps)) > long(STEPS_PER_REVOLUTION / 2) || std::abs(long(decSteps) - long(currentDecSteps)) > long(STEPS_PER_REVOLUTION / 2))
         {
-            // Yeah, that's a flip.
-
             m_raTarget = new double(ra);
             m_decTarget = new double(dec);
 
-            // Let's go back to home since we are changing pier sides.
+            // Let's go back to home since we are changing pier sides. The mount otherwise wants to
+            // take shortest distance, which can be wrong.
             // Takes a little longer to slew, but keeps things simple.
 
             LOGF_INFO("%s to home, then to %f %f, %d, %d", statusStr, ra, dec, raSteps, decSteps);
