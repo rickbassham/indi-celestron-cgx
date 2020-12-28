@@ -20,21 +20,19 @@ public:
 
     EQAlignment(uint32_t stepsPerRevolution);
 
-    void UpdateSteps(uint32_t ra, uint32_t dec);
-    void UpdateStepsRA(uint32_t steps);
-    void UpdateStepsDec(uint32_t steps);
     void UpdateLongitude(double lng);
 
     void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
                                 TelescopePierSide &pierSide);
 
-    void RADecFromEncoderValues(double &ra, double &dec,
+    void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps,
+                                double &ra, double &dec,
                                 TelescopePierSide &pierSide);
 
-    double hourAngleFromEncoder();
+    double hourAngleFromEncoder(uint32_t raSteps);
     uint32_t encoderFromHourAngle(double hourAngle);
 
-    void decAndPierSideFromEncoder(double &dec, TelescopePierSide &pierSide);
+    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide);
     uint32_t encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide);
 
     double localSiderealTime();
@@ -50,9 +48,6 @@ private:
     uint32_t m_stepsAtHomePositionRA;
     double m_stepsPerDegree;
     double m_stepsPerHour;
-
-    uint32_t m_raSteps;
-    uint32_t m_decSteps;
 
     double m_longitude;
 };

@@ -21,6 +21,7 @@
 #include <libindi/indiguiderinterface.h>
 #include <libindi/inditelescope.h>
 #include <libindi/connectionplugins/connectionserial.h>
+#include <alignment/AlignmentSubsystemForDrivers.h>
 
 #include "auxproto.h"
 #include "simplealignment.h"
@@ -41,8 +42,9 @@
  *
  * @author Rick Bassham
  */
-class CelestronCGX : public INDI::Telescope, public INDI::GuiderInterface
-
+class CelestronCGX : public INDI::Telescope,
+                     public INDI::GuiderInterface,
+                     public INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers
 {
 public:
   CelestronCGX();
@@ -89,9 +91,36 @@ protected:
 
   virtual bool saveConfigItems(FILE *fp) override;
 
+  // adds an entry to the alignment database.
+  // ra is in decimal hours
+  // returns true if an entry was added, otherwise false
+  bool AddAlignmentEntry(double ra, double dec);
+
+  // uses the alignment subsystem to convert actual RA/Dec to mount RA/Dec.
+  // ra should be in decimal hours
+  // ra and dec are the actual sky RA/Dec we want (used in Slewing).
+  // Returns ln_eq_posn with decimal degrees for RA and Dec.
+  ln_equ_posn SkyToTelescopeEquatorial(double ra, double dec);
+
+  // uses the alignment subsystem to convert a mount RA/Dec to actual RA/Dec.
+  // ra should be in decimal hours
+  // ra and dec are where the mount thinks it is.
+  // Returns ln_eq_posn with decimal degrees for RA and Dec.
+  ln_equ_posn TelescopeEquatorialToSky(double ra, double dec);
+
+  void mountPosition(double &ra, double &dec, TelescopePierSide &pierSide);
+
 private:
   static const uint32_t STEPS_PER_REVOLUTION;
   static const double STEPS_PER_DEGREE;
+
+  const INDI::AlignmentSubsystem::TelescopeDirectionVector
+  TelescopeDirectionVectorFromEquatorialCoordinates2(struct ln_equ_posn EquatorialCoordinates)
+  {
+    return TelescopeDirectionVectorFromSphericalCoordinate(ln_deg_to_rad(EquatorialCoordinates.ra), ANTI_CLOCKWISE,
+                                                           ln_deg_to_rad(EquatorialCoordinates.dec),
+                                                           FROM_POLAR_AXIS);
+  };
 
   /// used by GoTo and Park
   void StartSlew(double ra, double dec, TelescopeStatus status, bool skipPierSideCheck = false);
@@ -104,6 +133,9 @@ private:
 
   INumber GuideRateN[2];
   INumberVectorProperty GuideRateNP;
+
+  INumber AlignmentPositionN[2];
+  INumberVectorProperty AlignmentPositionNP;
 
   ISwitch AlignS[1];
   ISwitchVectorProperty AlignSP;

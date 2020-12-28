@@ -1,4 +1,13 @@
 {
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "*.cps": "javascript",
+        "*.h": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "limits": "cpp",
+        "type_traits": "cpp"
+    }
 }

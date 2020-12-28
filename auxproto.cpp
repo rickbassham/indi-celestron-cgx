@@ -298,7 +298,7 @@ long AUXCommand::getPosition()
     }
 }
 
-void AUXCommand::setPosition(uint32_t p)
+void AUXCommand::setPosition(long p)
 {
     data.resize(3);
     // Fold the value to 0-STEPS_PER_REVOLUTION range

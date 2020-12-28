@@ -65,7 +65,7 @@ public:
     void parseBuf(buffer buf);
     void parseBuf(buffer buf, bool do_checksum);
     long getPosition();
-    void setPosition(uint32_t p);
+    void setPosition(long p);
     void setRate(unsigned char r);
     unsigned char checksum(buffer buf);
     void dumpCmd();
