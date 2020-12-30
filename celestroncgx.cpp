@@ -109,11 +109,6 @@ bool CelestronCGX::initProperties()
     IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS", "Encoder Ticks",
                        MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
 
-    IUFillNumber(&AlignmentPositionN[AXIS_RA], "ALIGNMENT_POSITION_RA", "Alignment Position RA", "%010.6m", 0, 24, 0, 0);
-    IUFillNumber(&AlignmentPositionN[AXIS_DE], "ALIGNMENT_POSITION_DEC", "Alignment Position DEC", "%010.6m", -90, 90, 0, 0);
-    IUFillNumberVector(&AlignmentPositionNP, AlignmentPositionN, 2, getDeviceName(), "ALIGNMENT_POSITION", "Alignment Position",
-                       MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
-
     IUFillNumber(&LocationDebugN[0], "HA", "HA (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumber(&LocationDebugN[1], "LST", "LST (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG", "Mount Pointing", MAIN_CONTROL_TAB,
@@ -139,8 +134,8 @@ bool CelestronCGX::initProperties()
 
     initGuiderProperties(getDeviceName(), GUIDE_TAB);
     /* How fast do we guide compared to sidereal rate */
-    IUFillNumber(&GuideRateN[AXIS_RA], "GUIDE_RATE_WE", "W/E Rate", "%.0f", 10, 100, 1, 50);
-    IUFillNumber(&GuideRateN[AXIS_DE], "GUIDE_RATE_NS", "N/S Rate", "%.0f", 10, 100, 1, 50);
+    IUFillNumber(&GuideRateN[AXIS_RA], "GUIDE_RATE_WE", "W/E Rate", "%.f", 10, 100, 1, 50);
+    IUFillNumber(&GuideRateN[AXIS_DE], "GUIDE_RATE_NS", "N/S Rate", "%.f", 10, 100, 1, 50);
     IUFillNumberVector(&GuideRateNP, GuideRateN, 2, getDeviceName(), "GUIDE_RATE", "Guiding Rate", GUIDE_TAB, IP_RW, 0,
                        IPS_IDLE);
 
@@ -148,8 +143,6 @@ bool CelestronCGX::initProperties()
     addDebugControl();
 
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::InitAlignmentProperties(this);
-
-    getSwitch("ALIGNMENT_SUBSYSTEM_ACTIVE")->sp[0].s = ISS_ON;
 
     setDriverInterface(getDriverInterface() | GUIDER_INTERFACE);
 
@@ -178,7 +171,6 @@ bool CelestronCGX::updateProperties()
 
         defineNumber(&EncoderTicksNP);
         defineNumber(&LocationDebugNP);
-        defineNumber(&AlignmentPositionNP);
 
         defineSwitch(&AlignSP);
         defineText(&VersionTP);
@@ -209,7 +201,6 @@ bool CelestronCGX::updateProperties()
         deleteProperty(GuideWENP.name);
         deleteProperty(GuideRateNP.name);
         deleteProperty(EncoderTicksNP.name);
-        deleteProperty(AlignmentPositionNP.name);
         deleteProperty(LocationDebugNP.name);
         deleteProperty(AlignSP.name);
         deleteProperty(VersionTP.name);
@@ -330,6 +321,46 @@ bool CelestronCGX::Handshake()
     }
 
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::Initialise(this);
+
+    ISwitchVectorProperty *activateAlignmentSubsystem = getSwitch("ALIGNMENT_SUBSYSTEM_ACTIVE");
+    activateAlignmentSubsystem->sp[0].s = ISS_ON;
+    activateAlignmentSubsystem->s = IPS_OK;
+    IDSetSwitch(activateAlignmentSubsystem, nullptr);
+
+    ISwitchVectorProperty *mathPlugins = getSwitch("ALIGNMENT_SUBSYSTEM_MATH_PLUGINS");
+    if (mathPlugins)
+    {
+        int svdIndex = -1;
+
+        for (int i = 0; i < mathPlugins->nsp; i++)
+        {
+            // Prefer the SVD Math Plugin if we can find it.
+            if (strcmp(mathPlugins->sp[i].name, "SVD Math Plugin") == 0)
+            {
+                svdIndex = i;
+                break;
+            }
+        }
+
+        if (svdIndex >= 0)
+        {
+            for (int i = 0; i < mathPlugins->nsp; i++)
+            {
+                // Prefer the SVD Math Plugin if we can find it.
+                if (svdIndex == i)
+                {
+                    mathPlugins->sp[i].s = ISS_ON;
+                }
+                else
+                {
+                    mathPlugins->sp[i].s = ISS_OFF;
+                }
+            }
+        }
+
+        mathPlugins->s = IPS_OK;
+        IDSetSwitch(mathPlugins, nullptr);
+    }
 
     return INDI::Telescope::Handshake();
 }
@@ -669,18 +700,14 @@ bool CelestronCGX::ReadScopeStatus()
         }
     }
 
-    double RightAscension, Declination;
+    double mountRA, mountDec;
     TelescopePierSide pierSide;
-    mountPosition(RightAscension, Declination, pierSide);
+    mountPosition(mountRA, mountDec, pierSide);
 
-    ln_equ_posn skyPosition = TelescopeEquatorialToSky(RightAscension, Declination);
+    double skyRA, skyDec;
+    TelescopeEquatorialToSky(mountRA, mountDec, skyRA, skyDec);
 
-    NewRaDec(decimalDegreesToDecimalHours(range360(skyPosition.ra)), rangeDec(skyPosition.dec));
-
-    AlignmentPositionN[AXIS_RA].value = decimalDegreesToDecimalHours(range360(skyPosition.ra));
-    AlignmentPositionN[AXIS_DE].value = rangeDec(skyPosition.dec);
-    AlignmentPositionNP.s = IPS_OK;
-    IDSetNumber(&AlignmentPositionNP, nullptr);
+    NewRaDec(skyRA, skyDec);
 
     return true;
 }
@@ -829,7 +856,11 @@ bool CelestronCGX::Sync(double ra, double dec)
     ra = range24(ra);
     dec = rangeDec(dec);
 
-    AddAlignmentEntry(ra, dec);
+    double mountRA, mountDec;
+    TelescopePierSide pierSide;
+    mountPosition(mountRA, mountDec, pierSide);
+
+    AddAlignmentEntryEquatorial(ra, dec, mountRA, mountDec);
 
     return true;
 }
@@ -855,11 +886,11 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool
     RememberTrackState = TrackState;
     TrackState = status;
 
-    uint32_t targetRASteps, targetDecSteps;
-    ln_equ_posn targetCoords = SkyToTelescopeEquatorial(ra, dec);
+    double targetRA, targetDec;
 
-    double targetRA = decimalDegreesToDecimalHours(range360(targetCoords.ra));
-    double targetDec = rangeDec(targetCoords.dec);
+    SkyToTelescopeEquatorial(ra, dec, targetRA, targetDec);
+
+    uint32_t targetRASteps, targetDecSteps;
 
     LOGF_INFO("ra, dec: %8.3f, %8.3f; target ra, dec: %8.3f, %8.3f", ra, dec, targetRA, targetDec);
 
@@ -1018,7 +1049,7 @@ bool CelestronCGX::updateLocation(double latitude, double longitude, double elev
 
 IPState CelestronCGX::GuideNorth(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: N %.0f ms", ms);
+    LOGF_DEBUG("Guiding: N %d ms", ms);
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
@@ -1035,7 +1066,7 @@ IPState CelestronCGX::GuideNorth(uint32_t ms)
 
 IPState CelestronCGX::GuideSouth(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: S %.0f ms", ms);
+    LOGF_DEBUG("Guiding: S %d ms", ms);
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
@@ -1052,7 +1083,7 @@ IPState CelestronCGX::GuideSouth(uint32_t ms)
 
 IPState CelestronCGX::GuideEast(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: E %.0f ms", ms);
+    LOGF_DEBUG("Guiding: E %d ms", ms);
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
@@ -1069,7 +1100,7 @@ IPState CelestronCGX::GuideEast(uint32_t ms)
 
 IPState CelestronCGX::GuideWest(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: W %.0f ms", ms);
+    LOGF_DEBUG("Guiding: W %d ms", ms);
 
     uint8_t ticks = std::min(uint32_t(255), ms / 10);
 
@@ -1094,28 +1125,28 @@ void CelestronCGX::mountPosition(double &ra, double &dec, TelescopePierSide &pie
     pierSide = static_cast<TelescopePierSide>(alignmentPierSide);
 }
 
-bool CelestronCGX::AddAlignmentEntry(double ra, double dec)
+bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA, double mountDec)
 {
-    double LST = get_local_sidereal_time(lnobserver.lng);
+    ln_lnlat_posn location;
+    if (!GetDatabaseReferencePosition(location))
+    {
+        return false;
+    }
 
-    double mountRA, mountDec;
-
-    TelescopePierSide pierSide;
-    mountPosition(mountRA, mountDec, pierSide);
-
+    double LST = get_local_sidereal_time(location.lng);
     struct ln_equ_posn RaDec
     {
         0, 0
     };
     RaDec.ra = range360(((LST - mountRA) * 360.0) / 24.0);
-    RaDec.dec = rangeDec(mountDec);
+    RaDec.dec = mountDec;
 
     INDI::AlignmentSubsystem::AlignmentDatabaseEntry NewEntry;
     INDI::AlignmentSubsystem::TelescopeDirectionVector TDV = TelescopeDirectionVectorFromLocalHourAngleDeclination(RaDec);
 
     NewEntry.ObservationJulianDate = ln_get_julian_from_sys();
-    NewEntry.RightAscension = ra;
-    NewEntry.Declination = dec;
+    NewEntry.RightAscension = actualRA;
+    NewEntry.Declination = actualDec;
     NewEntry.TelescopeDirection = TDV;
     NewEntry.PrivateDataSize = 0;
 
@@ -1123,6 +1154,8 @@ bool CelestronCGX::AddAlignmentEntry(double ra, double dec)
     {
         GetAlignmentDatabase().push_back(NewEntry);
         UpdateSize();
+
+        // tell the math plugin about the new alignment point
         Initialise(this);
 
         return true;
@@ -1131,79 +1164,69 @@ bool CelestronCGX::AddAlignmentEntry(double ra, double dec)
     return false;
 }
 
-ln_equ_posn CelestronCGX::SkyToTelescopeEquatorial(double ra, double dec)
+bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA, double &mountDec)
 {
     ln_equ_posn eq{0, 0};
     INDI::AlignmentSubsystem::TelescopeDirectionVector TDV;
-    double RightAscension, Declination;
+    ln_lnlat_posn location;
+
+    // by default, just return what we were given
+    mountRA = actualRA;
+    mountDec = actualDec;
+
+    if (!GetDatabaseReferencePosition(location))
+    {
+        return false;
+    }
 
     if (GetAlignmentDatabase().size() > 1)
     {
-        if (TransformCelestialToTelescope(ra, dec, 0.0, TDV))
+        if (TransformCelestialToTelescope(actualRA, actualDec, 0.0, TDV))
         {
             LocalHourAngleDeclinationFromTelescopeDirectionVector(TDV, eq);
 
             //  and now we have to convert from lha back to RA
-            double LST = get_local_sidereal_time(lnobserver.lng);
+            double LST = get_local_sidereal_time(location.lng);
             eq.ra = eq.ra * 24 / 360;
-            RightAscension = LST - eq.ra;
-            RightAscension = range24(RightAscension);
-            Declination = eq.dec;
-        }
-        else
-        {
-            RightAscension = ra;
-            Declination = dec;
+            mountRA = range24(LST - eq.ra);
+            mountDec = eq.dec;
+
+            return true;
         }
     }
-    else
-    {
-        RightAscension = ra;
-        Declination = dec;
-    }
 
-    // again, ln_equ_posn should have ra in decimal degrees
-    eq.ra = decimalHoursToDecimalDegrees(RightAscension);
-    eq.dec = Declination;
-
-    return eq;
+    return false;
 }
 
-ln_equ_posn CelestronCGX::TelescopeEquatorialToSky(double ra, double dec)
+bool CelestronCGX::TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA, double &actualDec)
 {
-    double RightAscension, Declination;
     ln_equ_posn eq{0, 0};
+    ln_lnlat_posn location;
+
+    // by default, just return what we were given
+    actualRA = mountRA;
+    actualDec = mountDec;
+
+    if (!GetDatabaseReferencePosition(location))
+    {
+        return false;
+    }
 
     if (GetAlignmentDatabase().size() > 1)
     {
         INDI::AlignmentSubsystem::TelescopeDirectionVector TDV;
 
         double lha, lst;
-        lst = get_local_sidereal_time(lnobserver.lng);
-        lha = get_local_hour_angle(lst, ra);
+        lst = get_local_sidereal_time(location.lng);
+        lha = get_local_hour_angle(lst, mountRA);
 
-        eq.ra = decimalHoursToDecimalDegrees(lha);
-        eq.dec = dec;
+        eq.ra = lha * 360.0 / 24.0;
+        eq.dec = mountDec;
 
         TDV = TelescopeDirectionVectorFromLocalHourAngleDeclination(eq);
 
-        if (!TransformTelescopeToCelestial(TDV, RightAscension, Declination))
-        {
-            RightAscension = decimalDegreesToDecimalHours(eq.ra);
-            Declination = eq.dec;
-        }
-    }
-    else
-    {
-        // With less than 2 align points
-        // Just return raw data
-        RightAscension = ra;
-        Declination = dec;
+        return TransformTelescopeToCelestial(TDV, actualRA, actualDec);
     }
 
-    // again, ln_equ_posn should have ra in decimal degrees
-    eq.ra = decimalHoursToDecimalDegrees(RightAscension);
-    eq.dec = Declination;
-
-    return eq;
+    return false;
 }

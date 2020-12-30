@@ -91,22 +91,9 @@ protected:
 
   virtual bool saveConfigItems(FILE *fp) override;
 
-  // adds an entry to the alignment database.
-  // ra is in decimal hours
-  // returns true if an entry was added, otherwise false
-  bool AddAlignmentEntry(double ra, double dec);
-
-  // uses the alignment subsystem to convert actual RA/Dec to mount RA/Dec.
-  // ra should be in decimal hours
-  // ra and dec are the actual sky RA/Dec we want (used in Slewing).
-  // Returns ln_eq_posn with decimal degrees for RA and Dec.
-  ln_equ_posn SkyToTelescopeEquatorial(double ra, double dec);
-
-  // uses the alignment subsystem to convert a mount RA/Dec to actual RA/Dec.
-  // ra should be in decimal hours
-  // ra and dec are where the mount thinks it is.
-  // Returns ln_eq_posn with decimal degrees for RA and Dec.
-  ln_equ_posn TelescopeEquatorialToSky(double ra, double dec);
+  bool AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA, double mountDec);
+  bool SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA, double &mountDec);
+  bool TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA, double &actualDec);
 
   void mountPosition(double &ra, double &dec, TelescopePierSide &pierSide);
 
@@ -133,9 +120,6 @@ private:
 
   INumber GuideRateN[2];
   INumberVectorProperty GuideRateNP;
-
-  INumber AlignmentPositionN[2];
-  INumberVectorProperty AlignmentPositionNP;
 
   ISwitch AlignS[1];
   ISwitchVectorProperty AlignSP;
