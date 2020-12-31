@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright(c) 2015 Jasem Mutlaq. All rights reserved.
+ Copyright(c) 2020 Rick Bassham. All rights reserved.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Library General Public
@@ -23,8 +23,8 @@
 #include <libindi/connectionplugins/connectionserial.h>
 #include <alignment/AlignmentSubsystemForDrivers.h>
 
-#include "auxproto.h"
 #include "simplealignment.h"
+#include "celestrondriver.h"
 
 /**
  * @brief The CelestronCGX class provides a simple mount simulator of an equatorial mount.
@@ -44,7 +44,8 @@
  */
 class CelestronCGX : public INDI::Telescope,
                      public INDI::GuiderInterface,
-                     public INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers
+                     public INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers,
+                     public CelestronCommandHandler
 {
 public:
   CelestronCGX();
@@ -64,6 +65,24 @@ public:
   virtual bool ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[],
                          char *formats[], char *names[], int n) override;
   virtual bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n) override;
+
+  // CelestronCommandHandler
+public:
+  virtual bool HandleGetVersion(INDI_EQ_AXIS axis, char *version) override;
+  virtual bool HandleGetPosition(INDI_EQ_AXIS axis, long steps) override;
+  virtual bool HandleStartAlign(INDI_EQ_AXIS axis) override;
+  virtual bool HandleAlignDone(INDI_EQ_AXIS axis, bool done) override;
+  virtual bool HandleMoveNegative(INDI_EQ_AXIS axis) override;
+  virtual bool HandleMovePositive(INDI_EQ_AXIS axis) override;
+  virtual bool HandleGotoFast(INDI_EQ_AXIS axis) override;
+  virtual bool HandleGotoSlow(INDI_EQ_AXIS axis) override;
+  virtual bool HandleSetPosition(INDI_EQ_AXIS axis) override;
+  virtual bool HandleTrack() override;
+  virtual bool HandleSlewDone(INDI_EQ_AXIS axis, bool done) override;
+  virtual bool HandleGetAutoguideRate(INDI_EQ_AXIS axis, uint8_t rate) override;
+  virtual bool HandleSetAutoguideRate(INDI_EQ_AXIS axis) override;
+  virtual bool HandleGuidePulse(INDI_EQ_AXIS axis) override;
+  virtual bool HandleGuidePulseDone(INDI_EQ_AXIS axis, bool done) override;
 
 protected:
   virtual bool MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command) override;
@@ -124,10 +143,10 @@ private:
   ISwitch AlignS[1];
   ISwitchVectorProperty AlignSP;
 
-  IText VersionT[3];
+  IText VersionT[2];
   ITextVectorProperty VersionTP;
 
-  uint8_t slewRate();
+  CelestronDriver::SlewRate slewRate();
 
   bool m_manualSlew{false};
 
@@ -141,12 +160,8 @@ private:
   double *m_decTarget{nullptr};
 
   bool startAlign();
-  bool getDec();
-  bool getRA();
 
-  bool sendCmd(AUXCommand cmd);
-  bool readCmd(int timeout = 1);
-  bool handleCommand(AUXCommand cmd);
+  CelestronDriver m_driver;
 
   EQAlignment m_alignment;
 };

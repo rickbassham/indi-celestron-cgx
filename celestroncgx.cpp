@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright(c) 2015 Jasem Mutlaq. All rights reserved.
+ Copyright(c) 2020 Rick Bassham. All rights reserved.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Library General Public
@@ -17,7 +17,6 @@
 *******************************************************************************/
 
 #include "celestroncgx.h"
-#include "auxproto.h"
 #include "config.h"
 
 #include <libindi/indicom.h>
@@ -30,11 +29,6 @@
 
 // We declare an auto pointer to CelestronCGX.
 static std::unique_ptr<CelestronCGX> cgx(new CelestronCGX());
-
-#define MAX_SLEW_RATE 0x09
-#define FIND_SLEW_RATE 0x07
-#define CENTERING_SLEW_RATE 0x03
-#define GUIDE_SLEW_RATE 0x02
 
 void ISPoll(void *p);
 
@@ -123,10 +117,9 @@ bool CelestronCGX::initProperties()
     IUFillSwitchVector(&AlignSP, AlignS, 1, getDeviceName(), "ALIGN", "Align", MAIN_CONTROL_TAB, IP_RW, ISR_ATMOST1, 0,
                        IPS_IDLE);
 
-    IUFillText(&VersionT[0], "VERSION_MAIN", "Main Version", "");
-    IUFillText(&VersionT[1], "VERSION_DEC", "Dec Motor Version", "");
-    IUFillText(&VersionT[2], "VERSION_RA", "RA Motor Version", "");
-    IUFillTextVector(&VersionTP, VersionT, 3, getDeviceName(), "CGX_VERSION", "CGX Version", OPTIONS_TAB, IP_RO, 0,
+    IUFillText(&VersionT[AXIS_RA], "VERSION_RA", "RA Motor Version", "");
+    IUFillText(&VersionT[AXIS_DE], "VERSION_DEC", "Dec Motor Version", "");
+    IUFillTextVector(&VersionTP, VersionT, 2, getDeviceName(), "CGX_VERSION", "CGX Version", OPTIONS_TAB, IP_RO, 0,
                      IPS_IDLE);
 
     // Use the HA to park, as it is constant for a given mount orientation.
@@ -221,18 +214,6 @@ bool CelestronCGX::ISNewNumber(const char *dev, const char *name, double values[
             GuideRateNP.s = IPS_OK;
             IDSetNumber(&GuideRateNP, nullptr);
 
-            uint8_t ra = static_cast<uint8_t>(std::min(GuideRateN[AXIS_RA].value * 256 / 100, 255.0));
-            uint8_t dec = static_cast<uint8_t>(std::min(GuideRateN[AXIS_DE].value * 256 / 100, 255.0));
-
-            buffer raData(1);
-            raData[0] = ra;
-
-            buffer decData(1);
-            decData[0] = dec;
-
-            sendCmd(AUXCommand(MC_SET_AUTOGUIDE_RATE, ANY, RA, raData));
-            sendCmd(AUXCommand(MC_SET_AUTOGUIDE_RATE, ANY, DEC, decData));
-
             return true;
         }
 
@@ -306,19 +287,23 @@ bool CelestronCGX::Handshake()
 {
     LOG_INFO("Starting Handshake");
 
-    AUXCommand raVer(GET_VER, ANY, RA);
-    if (!sendCmd(raVer))
+    m_driver.SetHandler(this);
+    m_driver.SetPortFD(PortFD);
+
+    if (!m_driver.GetVersion(AXIS_DE))
     {
-        LOG_ERROR("error sending raVer");
+        LOG_ERROR("error getting DEC version");
         return false;
     }
 
-    AUXCommand decVer(GET_VER, ANY, DEC);
-    if (!sendCmd(decVer))
+    if (!m_driver.GetVersion(AXIS_RA))
     {
-        LOG_ERROR("error sending decVer");
+        LOG_ERROR("error getting RA version");
         return false;
     }
+
+    m_driver.GetAutoguideRate(AXIS_RA);
+    m_driver.GetAutoguideRate(AXIS_DE);
 
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::Initialise(this);
 
@@ -365,201 +350,6 @@ bool CelestronCGX::Handshake()
     return INDI::Telescope::Handshake();
 }
 
-bool CelestronCGX::sendCmd(AUXCommand cmd)
-{
-    buffer buf;
-    int nbytes_written = 0;
-
-    cmd.fillBuf(buf);
-
-    bool success = tty_write(PortFD, (char *)buf.data(), buf.size(), &nbytes_written) == TTY_OK;
-    if (!success)
-    {
-        return false;
-    }
-
-    success = tcflush(PortFD, TCIOFLUSH) == TTY_OK;
-    if (!success)
-    {
-        return false;
-    }
-
-    return readCmd();
-}
-
-bool CelestronCGX::readCmd(int timeout)
-{
-    AUXCommand cmd;
-
-    int n;
-    unsigned char buf[32];
-    bool success = true;
-
-    do
-    {
-        int result = tty_read(PortFD, (char *)buf, 1, timeout, &n);
-        if (result != TTY_OK)
-        {
-            return false;
-        }
-    } while (buf[0] != 0x3b);
-
-    if (timeout == 0)
-    {
-        // we found something, so make sure to set the timeout back to something reasonable
-        timeout = 1;
-    }
-
-    // Found the start of a packet, now read the length.
-    success = tty_read(PortFD, (char *)(buf + 1), 1, timeout, &n) == TTY_OK;
-    if (!success)
-    {
-        LOG_ERROR("error finding packet length");
-        return false;
-    }
-
-    // Read the rest of the packet and verify the length. Add one for the checksum byte.
-    success = tty_read(PortFD, (char *)(buf + 2), buf[1] + 1, timeout, &n) == TTY_OK && n == buf[1] + 1;
-    if (!success)
-    {
-        LOG_ERROR("error reading packet");
-        return false;
-    }
-
-    // make a clean buffer that just contains the packet
-    buffer b(buf, buf + (n + 2));
-
-    cmd.parseBuf(b);
-
-    return handleCommand(cmd);
-}
-
-bool CelestronCGX::handleCommand(AUXCommand cmd)
-{
-    switch (cmd.cmd)
-    {
-    case GET_VER:
-        if (cmd.src == MB)
-        {
-            VersionTP.tp[0].text = new char[16];
-            snprintf(VersionTP.tp[0].text, 16, "%d.%d", cmd.data[0], cmd.data[1]);
-        }
-        else if (cmd.src == DEC)
-        {
-            VersionTP.tp[1].text = new char[16];
-            snprintf(VersionTP.tp[1].text, 16, "%d.%d", cmd.data[0], cmd.data[1]);
-        }
-        else if (cmd.src == RA)
-        {
-            VersionTP.tp[2].text = new char[16];
-            snprintf(VersionTP.tp[2].text, 16, "%d.%d", cmd.data[0], cmd.data[1]);
-        }
-
-        VersionTP.s = IPS_OK;
-        IDSetText(&VersionTP, nullptr);
-
-        return true;
-    case MC_GET_POSITION:
-        if (cmd.src == DEC)
-        {
-            uint32_t steps = cmd.getPosition();
-            EncoderTicksN[AXIS_DE].value = steps;
-        }
-        else if (cmd.src == RA)
-        {
-            uint32_t steps = cmd.getPosition();
-            EncoderTicksN[AXIS_RA].value = steps;
-
-            LocationDebugN[0].value = m_alignment.hourAngleFromEncoder(steps);
-            LocationDebugN[1].value = m_alignment.localSiderealTime();
-
-            IDSetNumber(&LocationDebugNP, nullptr);
-        }
-        EncoderTicksNP.s = IPS_OK;
-        IDSetNumber(&EncoderTicksNP, nullptr);
-        return true;
-    case MC_LEVEL_START:
-        return true;
-    case MC_LEVEL_DONE:
-        if (cmd.src == DEC)
-        {
-            m_decAligned = cmd.data.size() > 0 && cmd.data[0] == 0xff;
-        }
-        else if (cmd.src == RA)
-        {
-            m_raAligned = cmd.data.size() > 0 && cmd.data[0] == 0xff;
-        }
-        return true;
-
-    case MC_MOVE_NEG:
-        return true;
-    case MC_MOVE_POS:
-        return true;
-    case MC_GOTO_FAST:
-        return true;
-    case MC_GOTO_SLOW:
-        return true;
-    case MC_SET_POSITION:
-        return true;
-    case MC_SET_POS_GUIDERATE:
-        return true;
-    case MC_SLEW_DONE:
-        if (cmd.src == DEC)
-        {
-            m_decSlewing = cmd.data[0] == 0x00;
-        }
-        else if (cmd.src == RA)
-        {
-            m_raSlewing = cmd.data[0] == 0x00;
-        }
-        return true;
-    case MC_GET_AUTOGUIDE_RATE:
-        if (cmd.src == DEC)
-        {
-            GuideRateN[AXIS_DE].value = cmd.data[0] * 100.0 / 255;
-        }
-        else if (cmd.src == RA)
-        {
-            GuideRateN[AXIS_RA].value = cmd.data[0] * 100.0 / 255;
-        }
-        IDSetNumber(&GuideRateNP, nullptr);
-
-        return true;
-    case MC_SET_AUTOGUIDE_RATE:
-        return true;
-    case MC_AUX_GUIDE:
-        return true;
-    case MC_AUX_GUIDE_ACTIVE:
-        if (cmd.src == DEC)
-        {
-            if (cmd.data[0] == 0)
-            {
-                GuideComplete(AXIS_DE);
-            }
-        }
-        else if (cmd.src == RA)
-        {
-            if (cmd.data[0] == 0)
-            {
-                GuideComplete(AXIS_RA);
-            }
-        }
-        return true;
-    case MC_SET_CORDWRAP_POS:
-        return true;
-    case MC_ENABLE_CORDWRAP:
-        return true;
-    }
-
-    fprintf(stderr, "unknown command 0x%02x ", cmd.cmd);
-
-    buffer b;
-    cmd.fillBuf(b);
-    dumpMsg(b);
-
-    return true;
-}
-
 bool CelestronCGX::startAlign()
 {
     AlignSP.s = IPS_BUSY;
@@ -568,58 +358,34 @@ bool CelestronCGX::startAlign()
     m_raAligned = false;
     m_decAligned = false;
 
-    if (!sendCmd(AUXCommand(MC_LEVEL_START, ANY, RA)))
-    {
-        LOG_ERROR("error starting align on az");
-        return false;
-    }
-
-    if (!sendCmd(AUXCommand(MC_LEVEL_START, ANY, DEC)))
-    {
-        LOG_ERROR("error starting align on alt");
-        return false;
-    }
+    m_driver.StartAlign(AXIS_RA);
+    m_driver.StartAlign(AXIS_DE);
 
     return true;
-}
-
-bool CelestronCGX::getDec()
-{
-    return sendCmd(AUXCommand(MC_GET_POSITION, ANY, DEC));
-}
-
-bool CelestronCGX::getRA()
-{
-    AUXCommand getPos(MC_GET_POSITION, ANY, RA);
-    return sendCmd(getPos);
 }
 
 bool CelestronCGX::ReadScopeStatus()
 {
     // Read any commands from the mount that we didn't initiate.
-    while (readCmd(0))
-        ;
+    m_driver.ReadPendingCommands();
 
-    getDec();
-    getRA();
-
-    sendCmd(AUXCommand(MC_GET_AUTOGUIDE_RATE, ANY, RA));
-    sendCmd(AUXCommand(MC_GET_AUTOGUIDE_RATE, ANY, DEC));
+    m_driver.GetPosition(AXIS_RA);
+    m_driver.GetPosition(AXIS_DE);
 
     if (GuideNSNP.s == IPS_BUSY)
     {
-        sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, DEC));
+        m_driver.CheckGuideDone(AXIS_DE);
     }
 
     if (GuideWENP.s == IPS_BUSY)
     {
-        sendCmd(AUXCommand(MC_AUX_GUIDE_ACTIVE, ANY, RA));
+        m_driver.CheckGuideDone(AXIS_RA);
     }
 
     if (AlignSP.s == IPS_BUSY)
     {
-        sendCmd(AUXCommand(MC_LEVEL_DONE, ANY, RA));
-        sendCmd(AUXCommand(MC_LEVEL_DONE, ANY, DEC));
+        m_driver.CheckAlignDone(AXIS_RA);
+        m_driver.CheckAlignDone(AXIS_DE);
 
         if (m_raAligned && m_decAligned)
         {
@@ -629,20 +395,13 @@ bool CelestronCGX::ReadScopeStatus()
             // wait for the motors to actually stop
             usleep(1000 * 500); // 500ms
 
-            AUXCommand raCmd(MC_SET_POSITION, ANY, RA);
-            raCmd.setPosition(m_alignment.GetStepsAtHomePositionRA());
-            sendCmd(raCmd);
-
-            AUXCommand decCmd(MC_SET_POSITION, ANY, DEC);
-            decCmd.setPosition(m_alignment.GetStepsAtHomePositionDec());
-            sendCmd(decCmd);
-
-            TelescopeStatus state = TrackState;
+            m_driver.SetPosition(AXIS_RA, m_alignment.GetStepsAtHomePositionRA());
+            m_driver.SetPosition(AXIS_DE, m_alignment.GetStepsAtHomePositionDec());
 
             SetTrackEnabled(false);
 
-            getDec();
-            getRA();
+            m_driver.GetPosition(AXIS_RA);
+            m_driver.GetPosition(AXIS_DE);
 
             AlignSP.s = IPS_OK;
             AlignS[0].s = ISS_OFF;
@@ -659,8 +418,8 @@ bool CelestronCGX::ReadScopeStatus()
 
     if (TrackState == SCOPE_SLEWING)
     {
-        sendCmd(AUXCommand(MC_SLEW_DONE, ANY, RA));
-        sendCmd(AUXCommand(MC_SLEW_DONE, ANY, DEC));
+        m_driver.CheckSlewDone(AXIS_RA);
+        m_driver.CheckSlewDone(AXIS_DE);
 
         if (m_manualSlew)
         {
@@ -690,8 +449,8 @@ bool CelestronCGX::ReadScopeStatus()
     }
     else if (TrackState == SCOPE_PARKING)
     {
-        sendCmd(AUXCommand(MC_SLEW_DONE, ANY, RA));
-        sendCmd(AUXCommand(MC_SLEW_DONE, ANY, DEC));
+        m_driver.CheckSlewDone(AXIS_RA);
+        m_driver.CheckSlewDone(AXIS_DE);
 
         if (!m_decSlewing && !m_raSlewing)
         {
@@ -742,11 +501,8 @@ bool CelestronCGX::Abort()
 
     TrackState = SCOPE_IDLE;
 
-    buffer dat(1);
-    dat[0] = 0x00;
-
-    sendCmd(AUXCommand(MC_MOVE_POS, ANY, DEC, dat));
-    sendCmd(AUXCommand(MC_MOVE_POS, ANY, RA, dat));
+    m_driver.MovePositive(AXIS_RA, CelestronDriver::SLEW_STOP);
+    m_driver.MovePositive(AXIS_DE, CelestronDriver::SLEW_STOP);
 
     return true;
 }
@@ -786,47 +542,18 @@ bool CelestronCGX::SetTrackMode(uint8_t mode)
 
 bool CelestronCGX::SetTrackEnabled(bool enabled)
 {
+    TelescopeTrackMode mode = static_cast<TelescopeTrackMode>(IUFindOnSwitchIndex(&TrackModeSP));
+
     if (enabled)
     {
-        buffer data(2);
-
-        TelescopeTrackMode mode = static_cast<TelescopeTrackMode>(IUFindOnSwitchIndex(&TrackModeSP));
-
-        switch (mode)
-        {
-        case TRACK_SIDEREAL:
-            data[0] = 0xff;
-            data[1] = 0xff;
-            break;
-        case TRACK_SOLAR:
-            data[0] = 0xff;
-            data[1] = 0xfe;
-            break;
-        case TRACK_LUNAR:
-            data[0] = 0xff;
-            data[1] = 0xfd;
-            break;
-        default:
-            return false;
-        }
-
         TrackState = SCOPE_TRACKING;
-
-        return sendCmd(AUXCommand(MC_SET_POS_GUIDERATE, ANY, RA, data));
     }
     else
     {
-        buffer data(3);
-        data[0] = 0x00;
-        data[1] = 0x00;
-        data[2] = 0x00;
-
         TrackState = SCOPE_IDLE;
-
-        return sendCmd(AUXCommand(MC_SET_POS_GUIDERATE, ANY, RA, data));
     }
 
-    return true;
+    return m_driver.Track(enabled, mode);
 }
 
 bool CelestronCGX::SetCurrentPark()
@@ -925,54 +652,53 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool
 
             LOGF_INFO("%s to home, then to %f %f, %d, %d", statusStr, ra, dec, targetRASteps, targetDecSteps);
 
-            AUXCommand raCmd(MC_GOTO_FAST, ANY, RA);
-            raCmd.setPosition(m_alignment.GetStepsAtHomePositionRA());
-            sendCmd(raCmd);
+            m_driver.SetPosition(AXIS_RA, m_alignment.GetStepsAtHomePositionRA());
+            m_driver.SetPosition(AXIS_DE, m_alignment.GetStepsAtHomePositionDec());
 
-            AUXCommand decCmd(MC_GOTO_FAST, ANY, DEC);
-            decCmd.setPosition(m_alignment.GetStepsAtHomePositionDec());
-            sendCmd(decCmd);
             return;
         }
     }
+
+    // TODO: Add approach
 
     bool raClose, decClose = false;
 
     raClose = std::abs(long(targetRASteps) - long(currentRASteps)) < long(STEPS_PER_DEGREE * 4);
     decClose = std::abs(long(targetDecSteps) - long(currentDecSteps)) < long(STEPS_PER_DEGREE * 4);
 
-    AUXCommands cmd = raClose && decClose ? MC_GOTO_SLOW : MC_GOTO_FAST;
-
-    AUXCommand raCmd(cmd, ANY, RA);
-    raCmd.setPosition(targetRASteps);
-    sendCmd(raCmd);
-
-    AUXCommand decCmd(cmd, ANY, DEC);
-    decCmd.setPosition(targetDecSteps);
-    sendCmd(decCmd);
+    if (raClose && decClose)
+    {
+        m_driver.GoToSlow(AXIS_RA, targetRASteps);
+        m_driver.GoToSlow(AXIS_DE, targetDecSteps);
+    }
+    else
+    {
+        m_driver.GoToFast(AXIS_RA, targetRASteps);
+        m_driver.GoToFast(AXIS_DE, targetDecSteps);
+    }
 
     m_manualSlew = false;
 
-    LOGF_INFO("%s to %f %f %d, %d, %d", statusStr, ra, dec, cmd, targetRASteps, targetDecSteps);
+    LOGF_INFO("%s to %f %f (%d, %d)", statusStr, ra, dec, targetRASteps, targetDecSteps);
 }
 
-uint8_t CelestronCGX::slewRate()
+CelestronDriver::SlewRate CelestronCGX::slewRate()
 {
     int index = IUFindOnSwitchIndex(&SlewRateSP);
 
     switch (index)
     {
     case SLEW_GUIDE:
-        return GUIDE_SLEW_RATE;
+        return CelestronDriver::SLEW_GUIDE;
     case SLEW_CENTERING:
-        return CENTERING_SLEW_RATE;
+        return CelestronDriver::SLEW_CENTERING;
     case SLEW_FIND:
-        return FIND_SLEW_RATE;
+        return CelestronDriver::SLEW_FIND;
     case SLEW_MAX:
-        return MAX_SLEW_RATE;
+        return CelestronDriver::SLEW_MAX;
     }
 
-    return FIND_SLEW_RATE;
+    return CelestronDriver::SLEW_FIND;
 }
 
 bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
@@ -985,20 +711,20 @@ bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
 
     m_manualSlew = true;
 
-    buffer dat(1);
-    dat[0] = 0x00;
-
     if (command == MOTION_STOP)
     {
         LOG_INFO("Stopping DEC motor");
-        return sendCmd(AUXCommand(MC_MOVE_POS, ANY, DEC, dat));
+        return m_driver.MovePositive(AXIS_DE, CelestronDriver::SLEW_STOP);
     }
 
     TrackState = SCOPE_SLEWING;
 
-    dat[0] = slewRate();
+    if (dir == DIRECTION_NORTH)
+    {
+        return m_driver.MoveNegative(AXIS_DE, slewRate());
+    }
 
-    return sendCmd(AUXCommand(dir == DIRECTION_NORTH ? MC_MOVE_NEG : MC_MOVE_POS, ANY, DEC, dat));
+    return m_driver.MovePositive(AXIS_DE, slewRate());
 }
 
 bool CelestronCGX::MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command)
@@ -1011,20 +737,20 @@ bool CelestronCGX::MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command)
 
     m_manualSlew = true;
 
-    buffer dat(1);
-    dat[0] = 0x00;
-
     if (command == MOTION_STOP)
     {
         LOG_INFO("Stopping RA motor");
-        return sendCmd(AUXCommand(MC_MOVE_POS, ANY, RA, dat));
+        return m_driver.MovePositive(AXIS_RA, CelestronDriver::SLEW_STOP);
     }
 
     TrackState = SCOPE_SLEWING;
 
-    dat[0] = slewRate();
+    if (dir == DIRECTION_EAST)
+    {
+        return m_driver.MoveNegative(AXIS_RA, slewRate());
+    }
 
-    return sendCmd(AUXCommand(dir == DIRECTION_WEST ? MC_MOVE_POS : MC_MOVE_NEG, ANY, RA, dat));
+    return m_driver.MovePositive(AXIS_RA, slewRate());
 }
 
 bool CelestronCGX::saveConfigItems(FILE *fp)
@@ -1051,15 +777,9 @@ IPState CelestronCGX::GuideNorth(uint32_t ms)
 {
     LOGF_DEBUG("Guiding: N %d ms", ms);
 
-    uint8_t ticks = std::min(uint32_t(255), ms / 10);
-
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_DE].value);
 
-    buffer data(2);
-    data[0] = rate;
-    data[1] = ticks;
-
-    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
+    m_driver.GuidePulse(AXIS_DE, ms, rate);
 
     return IPS_BUSY;
 }
@@ -1068,15 +788,9 @@ IPState CelestronCGX::GuideSouth(uint32_t ms)
 {
     LOGF_DEBUG("Guiding: S %d ms", ms);
 
-    uint8_t ticks = std::min(uint32_t(255), ms / 10);
-
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_DE].value);
 
-    buffer data(2);
-    data[0] = -rate;
-    data[1] = ticks;
-
-    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, DEC, data));
+    m_driver.GuidePulse(AXIS_DE, ms, -rate);
 
     return IPS_BUSY;
 }
@@ -1085,15 +799,9 @@ IPState CelestronCGX::GuideEast(uint32_t ms)
 {
     LOGF_DEBUG("Guiding: E %d ms", ms);
 
-    uint8_t ticks = std::min(uint32_t(255), ms / 10);
-
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_RA].value);
 
-    buffer data(2);
-    data[0] = -rate;
-    data[1] = ticks;
-
-    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
+    m_driver.GuidePulse(AXIS_RA, ms, -rate);
 
     return IPS_BUSY;
 }
@@ -1102,15 +810,9 @@ IPState CelestronCGX::GuideWest(uint32_t ms)
 {
     LOGF_DEBUG("Guiding: W %d ms", ms);
 
-    uint8_t ticks = std::min(uint32_t(255), ms / 10);
-
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_RA].value);
 
-    buffer data(2);
-    data[0] = rate;
-    data[1] = ticks;
-
-    sendCmd(AUXCommand(MC_AUX_GUIDE, ANY, RA, data));
+    m_driver.GuidePulse(AXIS_RA, ms, rate);
 
     return IPS_BUSY;
 }
@@ -1229,4 +931,142 @@ bool CelestronCGX::TelescopeEquatorialToSky(double mountRA, double mountDec, dou
     }
 
     return false;
+}
+
+// CelestronCommandHandler
+
+bool CelestronCGX::HandleGetVersion(INDI_EQ_AXIS axis, char *version)
+{
+    IUSaveText(&VersionT[axis], version);
+    VersionTP.s = IPS_OK;
+    IDSetText(&VersionTP, nullptr);
+
+    return true;
+}
+
+bool CelestronCGX::HandleGetPosition(INDI_EQ_AXIS axis, long steps)
+{
+    switch (axis)
+    {
+    case AXIS_DE:
+        EncoderTicksN[AXIS_DE].value = steps;
+        break;
+    case AXIS_RA:
+        EncoderTicksN[AXIS_RA].value = steps;
+
+        LocationDebugN[0].value = m_alignment.hourAngleFromEncoder(steps);
+        LocationDebugN[1].value = m_alignment.localSiderealTime();
+
+        IDSetNumber(&LocationDebugNP, nullptr);
+        break;
+    }
+    EncoderTicksNP.s = IPS_OK;
+    IDSetNumber(&EncoderTicksNP, nullptr);
+    return true;
+}
+
+bool CelestronCGX::HandleStartAlign(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleAlignDone(INDI_EQ_AXIS axis, bool done)
+{
+    switch (axis)
+    {
+    case AXIS_DE:
+        m_decAligned = done;
+        break;
+    case AXIS_RA:
+        m_raAligned = done;
+        break;
+    }
+
+    return true;
+}
+
+bool CelestronCGX::HandleMoveNegative(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleMovePositive(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleGotoFast(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleGotoSlow(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleSetPosition(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleTrack()
+{
+    return true;
+}
+
+bool CelestronCGX::HandleSlewDone(INDI_EQ_AXIS axis, bool done)
+{
+    switch (axis)
+    {
+    case AXIS_DE:
+        m_decSlewing = !done;
+        break;
+    case AXIS_RA:
+        m_raSlewing = !done;
+        break;
+    }
+
+    return true;
+}
+
+bool CelestronCGX::HandleGetAutoguideRate(INDI_EQ_AXIS axis, uint8_t rate)
+{
+    switch (axis)
+    {
+    case AXIS_DE:
+        GuideRateN[AXIS_DE].value = rate;
+        break;
+    case AXIS_RA:
+        GuideRateN[AXIS_RA].value = rate;
+        break;
+    }
+
+    return true;
+}
+
+bool CelestronCGX::HandleSetAutoguideRate(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleGuidePulse(INDI_EQ_AXIS axis)
+{
+    INDI_UNUSED(axis);
+    return true;
+}
+
+bool CelestronCGX::HandleGuidePulseDone(INDI_EQ_AXIS axis, bool done)
+{
+    if (done)
+        GuideComplete(axis);
+
+    return true;
 }
