@@ -114,7 +114,7 @@ protected:
   bool SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA, double &mountDec);
   bool TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA, double &actualDec);
 
-  void mountPosition(double &ra, double &dec, TelescopePierSide &pierSide);
+  void getMountPosition(double &ra, double &dec, TelescopePierSide &pierSide);
 
 private:
   static const uint32_t STEPS_PER_REVOLUTION;
@@ -129,7 +129,7 @@ private:
   };
 
   /// used by GoTo and Park
-  void StartSlew(double ra, double dec, TelescopeStatus status, bool skipPierSideCheck = false);
+  void StartSlew(double ra, double dec, bool skipPierSideCheck = false);
 
   INumber LocationDebugN[2];
   INumberVectorProperty LocationDebugNP;

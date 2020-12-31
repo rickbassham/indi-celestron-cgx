@@ -19,6 +19,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <libindi/inditelescope.h>
+
+using namespace INDI;
 
 /*
 Simple class to map steps on a motor to RA/Dec and back on an EQ mount.
@@ -26,33 +29,26 @@ Simple class to map steps on a motor to RA/Dec and back on an EQ mount.
 class EQAlignment
 {
 public:
-    enum TelescopePierSide
-    {
-        PIER_UNKNOWN = -1,
-        PIER_WEST = 0,
-        PIER_EAST = 1
-    };
-
     EQAlignment(uint32_t stepsPerRevolution);
 
     void UpdateLongitude(double lng);
 
     void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
-                                TelescopePierSide &pierSide);
+                                Telescope::TelescopePierSide &pierSide);
 
     void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps,
                                 double &ra, double &dec,
-                                TelescopePierSide &pierSide);
+                                Telescope::TelescopePierSide &pierSide);
 
     double hourAngleFromEncoder(uint32_t raSteps);
     uint32_t encoderFromHourAngle(double hourAngle);
 
-    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide);
-    uint32_t encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide);
+    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, Telescope::TelescopePierSide &pierSide);
+    uint32_t encoderFromDecAndPierSide(double dec, Telescope::TelescopePierSide pierSide);
 
     double localSiderealTime();
 
-    TelescopePierSide expectedPierSide(double ra);
+    Telescope::TelescopePierSide expectedPierSide(double ra);
 
     uint32_t GetStepsAtHomePositionDec() { return m_stepsAtHomePositionDec; }
     uint32_t GetStepsAtHomePositionRA() { return m_stepsAtHomePositionRA; }

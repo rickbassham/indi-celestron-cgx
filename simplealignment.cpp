@@ -34,15 +34,15 @@ void EQAlignment::UpdateLongitude(double lng)
     m_longitude = lng;
 }
 
-EQAlignment::TelescopePierSide EQAlignment::expectedPierSide(double ra)
+Telescope::TelescopePierSide EQAlignment::expectedPierSide(double ra)
 {
     double lst = localSiderealTime();
     double hourAngle = get_local_hour_angle(lst, ra);
-    return hourAngle <= 0 ? PIER_WEST : PIER_EAST;
+    return hourAngle <= 0 ? Telescope::PIER_WEST : Telescope::PIER_EAST;
 }
 
 void EQAlignment::EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
-                                         TelescopePierSide &pierSide)
+                                         Telescope::TelescopePierSide &pierSide)
 {
     pierSide = expectedPierSide(ra);
 
@@ -50,7 +50,7 @@ void EQAlignment::EncoderValuesFromRADec(double ra, double dec, uint32_t &raStep
     double lst = localSiderealTime();
     double hourAngle = lst - ra;
 
-    if (pierSide == PIER_WEST)
+    if (pierSide == Telescope::PIER_WEST)
     {
         hourAngle += 12.0;
     }
@@ -92,11 +92,11 @@ uint32_t EQAlignment::encoderFromHourAngle(double hourAngle)
     return steps;
 }
 
-uint32_t EQAlignment::encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide)
+uint32_t EQAlignment::encoderFromDecAndPierSide(double dec, Telescope::TelescopePierSide pierSide)
 {
     uint32_t stepsOffsetFromNinety = (90.0 - dec) * m_stepsPerDegree;
 
-    if (pierSide == PIER_WEST)
+    if (pierSide == Telescope::PIER_WEST)
     {
         return m_stepsAtHomePositionDec - stepsOffsetFromNinety;
     }
@@ -106,25 +106,25 @@ uint32_t EQAlignment::encoderFromDecAndPierSide(double dec, TelescopePierSide pi
     }
 }
 
-void EQAlignment::decAndPierSideFromEncoder(uint32_t decSteps, double &dec, TelescopePierSide &pierSide)
+void EQAlignment::decAndPierSideFromEncoder(uint32_t decSteps, double &dec, Telescope::TelescopePierSide &pierSide)
 {
     double degreesOffsetFromHome = 0.0;
     if (decSteps > m_stepsAtHomePositionDec)
     {
         degreesOffsetFromHome = (decSteps - m_stepsAtHomePositionDec) / m_stepsPerDegree;
-        pierSide = PIER_EAST;
+        pierSide = Telescope::PIER_EAST;
     }
     else
     {
         degreesOffsetFromHome = (m_stepsAtHomePositionDec - decSteps) / m_stepsPerDegree;
-        pierSide = PIER_WEST;
+        pierSide = Telescope::PIER_WEST;
     }
 
     dec = 90.0 - degreesOffsetFromHome;
 }
 
 void EQAlignment::RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
-                                         TelescopePierSide &pierSide)
+                                         Telescope::TelescopePierSide &pierSide)
 {
     double hourAngle = hourAngleFromEncoder(raSteps);
     double lst = localSiderealTime();
@@ -132,7 +132,7 @@ void EQAlignment::RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, do
 
     decAndPierSideFromEncoder(decSteps, dec, pierSide);
 
-    if (pierSide == PIER_WEST)
+    if (pierSide == Telescope::PIER_WEST)
     {
         ra = ra - 12.0;
     }
