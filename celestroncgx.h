@@ -18,13 +18,13 @@
 
 #pragma once
 
+#include <alignment/AlignmentSubsystemForDrivers.h>
+#include <libindi/connectionplugins/connectionserial.h>
 #include <libindi/indiguiderinterface.h>
 #include <libindi/inditelescope.h>
-#include <libindi/connectionplugins/connectionserial.h>
-#include <alignment/AlignmentSubsystemForDrivers.h>
 
-#include "simplealignment.h"
 #include "celestrondriver.h"
+#include "simplealignment.h"
 
 /**
  * @brief The CelestronCGX class provides a simple mount simulator of an equatorial mount.
@@ -47,121 +47,122 @@ class CelestronCGX : public INDI::Telescope,
                      public INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers,
                      public CelestronCommandHandler
 {
-public:
-  CelestronCGX();
-  virtual ~CelestronCGX() = default;
+  public:
+    CelestronCGX();
+    virtual ~CelestronCGX() = default;
 
-  virtual const char *getDefaultName() override;
-  virtual bool Connect() override;
-  virtual bool Disconnect() override;
-  virtual bool ReadScopeStatus() override;
-  virtual bool initProperties() override;
-  virtual void ISGetProperties(const char *dev) override;
-  virtual bool updateProperties() override;
-  virtual bool Handshake() override;
+    virtual const char *getDefaultName() override;
+    virtual bool Connect() override;
+    virtual bool Disconnect() override;
+    virtual bool ReadScopeStatus() override;
+    virtual bool initProperties() override;
+    virtual void ISGetProperties(const char *dev) override;
+    virtual bool updateProperties() override;
+    virtual bool Handshake() override;
 
-  virtual bool ISNewNumber(const char *dev, const char *name, double values[], char *names[], int n) override;
-  virtual bool ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int n) override;
-  virtual bool ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[],
-                         char *formats[], char *names[], int n) override;
-  virtual bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n) override;
+    virtual bool ISNewNumber(const char *dev, const char *name, double values[], char *names[],
+                             int n) override;
+    virtual bool ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[],
+                             int n) override;
+    virtual bool ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[],
+                           char *blobs[], char *formats[], char *names[], int n) override;
+    virtual bool ISNewText(const char *dev, const char *name, char *texts[], char *names[],
+                           int n) override;
 
-  // CelestronCommandHandler
-public:
-  virtual bool HandleGetVersion(INDI_EQ_AXIS axis, char *version) override;
-  virtual bool HandleGetPosition(INDI_EQ_AXIS axis, long steps) override;
-  virtual bool HandleStartAlign(INDI_EQ_AXIS axis) override;
-  virtual bool HandleAlignDone(INDI_EQ_AXIS axis, bool done) override;
-  virtual bool HandleMoveNegative(INDI_EQ_AXIS axis) override;
-  virtual bool HandleMovePositive(INDI_EQ_AXIS axis) override;
-  virtual bool HandleGotoFast(INDI_EQ_AXIS axis) override;
-  virtual bool HandleGotoSlow(INDI_EQ_AXIS axis) override;
-  virtual bool HandleSetPosition(INDI_EQ_AXIS axis) override;
-  virtual bool HandleTrack() override;
-  virtual bool HandleSlewDone(INDI_EQ_AXIS axis, bool done) override;
-  virtual bool HandleGetAutoguideRate(INDI_EQ_AXIS axis, uint8_t rate) override;
-  virtual bool HandleSetAutoguideRate(INDI_EQ_AXIS axis) override;
-  virtual bool HandleGuidePulse(INDI_EQ_AXIS axis) override;
-  virtual bool HandleGuidePulseDone(INDI_EQ_AXIS axis, bool done) override;
+    // CelestronCommandHandler
+  public:
+    virtual bool HandleGetVersion(INDI_EQ_AXIS axis, char *version) override;
+    virtual bool HandleGetPosition(INDI_EQ_AXIS axis, long steps) override;
+    virtual bool HandleStartAlign(INDI_EQ_AXIS axis) override;
+    virtual bool HandleAlignDone(INDI_EQ_AXIS axis, bool done) override;
+    virtual bool HandleMoveNegative(INDI_EQ_AXIS axis) override;
+    virtual bool HandleMovePositive(INDI_EQ_AXIS axis) override;
+    virtual bool HandleGotoFast(INDI_EQ_AXIS axis) override;
+    virtual bool HandleGotoSlow(INDI_EQ_AXIS axis) override;
+    virtual bool HandleSetPosition(INDI_EQ_AXIS axis) override;
+    virtual bool HandleTrack() override;
+    virtual bool HandleSlewDone(INDI_EQ_AXIS axis, bool done) override;
+    virtual bool HandleGetAutoguideRate(INDI_EQ_AXIS axis, uint8_t rate) override;
+    virtual bool HandleSetAutoguideRate(INDI_EQ_AXIS axis) override;
+    virtual bool HandleGuidePulse(INDI_EQ_AXIS axis) override;
+    virtual bool HandleGuidePulseDone(INDI_EQ_AXIS axis, bool done) override;
 
-protected:
-  virtual bool MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command) override;
-  virtual bool MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command) override;
-  virtual bool Abort() override;
+  protected:
+    virtual bool MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command) override;
+    virtual bool MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command) override;
+    virtual bool Abort() override;
 
-  virtual IPState GuideNorth(uint32_t ms) override;
-  virtual IPState GuideSouth(uint32_t ms) override;
-  virtual IPState GuideEast(uint32_t ms) override;
-  virtual IPState GuideWest(uint32_t ms) override;
+    virtual IPState GuideNorth(uint32_t ms) override;
+    virtual IPState GuideSouth(uint32_t ms) override;
+    virtual IPState GuideEast(uint32_t ms) override;
+    virtual IPState GuideWest(uint32_t ms) override;
 
-  virtual bool SetTrackMode(uint8_t mode) override;
-  virtual bool SetTrackEnabled(bool enabled) override;
+    virtual bool SetTrackMode(uint8_t mode) override;
+    virtual bool SetTrackEnabled(bool enabled) override;
 
-  virtual bool Goto(double, double) override;
-  virtual bool Park() override;
-  virtual bool UnPark() override;
-  virtual bool Sync(double ra, double dec) override;
+    virtual bool Goto(double, double) override;
+    virtual bool Park() override;
+    virtual bool UnPark() override;
+    virtual bool Sync(double ra, double dec) override;
 
-  // Parking
-  virtual bool SetParkPosition(double Axis1Value, double Axis2Value) override;
-  virtual bool SetCurrentPark() override;
-  virtual bool SetDefaultPark() override;
-  virtual bool updateLocation(double latitude, double longitude, double elevation) override;
+    // Parking
+    virtual bool SetParkPosition(double Axis1Value, double Axis2Value) override;
+    virtual bool SetCurrentPark() override;
+    virtual bool SetDefaultPark() override;
+    virtual bool updateLocation(double latitude, double longitude, double elevation) override;
 
-  virtual bool saveConfigItems(FILE *fp) override;
+    virtual bool saveConfigItems(FILE *fp) override;
 
-  bool AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA, double mountDec);
-  bool SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA, double &mountDec);
-  bool TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA, double &actualDec);
+    void getMountPosition(double &ra, double &dec, TelescopePierSide &pierSide);
 
-  void getMountPosition(double &ra, double &dec, TelescopePierSide &pierSide);
+    // AlignmentSubsystem
+    // TODO: Once https://github.com/indilib/indi/pull/1303 is in the stable release,
+    // remove these and use the methods there.
+    bool AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA,
+                                     double mountDec);
+    bool SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA,
+                                  double &mountDec);
+    bool TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA,
+                                  double &actualDec);
 
-private:
-  static const uint32_t STEPS_PER_REVOLUTION;
-  static const double STEPS_PER_DEGREE;
+  private:
+    static const uint32_t STEPS_PER_REVOLUTION;
+    static const double STEPS_PER_DEGREE;
 
-  const INDI::AlignmentSubsystem::TelescopeDirectionVector
-  TelescopeDirectionVectorFromEquatorialCoordinates2(struct ln_equ_posn EquatorialCoordinates)
-  {
-    return TelescopeDirectionVectorFromSphericalCoordinate(ln_deg_to_rad(EquatorialCoordinates.ra), ANTI_CLOCKWISE,
-                                                           ln_deg_to_rad(EquatorialCoordinates.dec),
-                                                           FROM_POLAR_AXIS);
-  };
+    /// used by GoTo and Park
+    void StartSlew(double ra, double dec, bool skipPierSideCheck = false);
 
-  /// used by GoTo and Park
-  void StartSlew(double ra, double dec, bool skipPierSideCheck = false);
+    INumber LocationDebugN[2];
+    INumberVectorProperty LocationDebugNP;
 
-  INumber LocationDebugN[2];
-  INumberVectorProperty LocationDebugNP;
+    INumber EncoderTicksN[2];
+    INumberVectorProperty EncoderTicksNP;
 
-  INumber EncoderTicksN[2];
-  INumberVectorProperty EncoderTicksNP;
+    INumber GuideRateN[2];
+    INumberVectorProperty GuideRateNP;
 
-  INumber GuideRateN[2];
-  INumberVectorProperty GuideRateNP;
+    ISwitch AlignS[1];
+    ISwitchVectorProperty AlignSP;
 
-  ISwitch AlignS[1];
-  ISwitchVectorProperty AlignSP;
+    IText VersionT[2];
+    ITextVectorProperty VersionTP;
 
-  IText VersionT[2];
-  ITextVectorProperty VersionTP;
+    CelestronDriver::SlewRate slewRate();
 
-  CelestronDriver::SlewRate slewRate();
+    bool m_manualSlew{false};
 
-  bool m_manualSlew{false};
+    bool m_raAligned{false};
+    bool m_decAligned{false};
 
-  bool m_raAligned{false};
-  bool m_decAligned{false};
+    bool m_raSlewing{false};
+    bool m_decSlewing{false};
 
-  bool m_raSlewing{false};
-  bool m_decSlewing{false};
+    double *m_raTarget{nullptr};
+    double *m_decTarget{nullptr};
 
-  double *m_raTarget{nullptr};
-  double *m_decTarget{nullptr};
+    bool startAlign();
 
-  bool startAlign();
+    CelestronDriver m_driver;
 
-  CelestronDriver m_driver;
-
-  EQAlignment m_alignment;
+    EQAlignment m_alignment;
 };

@@ -17,15 +17,16 @@
 *******************************************************************************/
 
 #include "celestroncgx.h"
-#include "config.h"
 
 #include <libindi/indicom.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include <cmath>
 #include <cstring>
 #include <memory>
-#include <termios.h>
-#include <unistd.h>
+
+#include "config.h"
 
 // We declare an auto pointer to CelestronCGX.
 static std::unique_ptr<CelestronCGX> cgx(new CelestronCGX());
@@ -52,8 +53,8 @@ void ISNewNumber(const char *dev, const char *name, double values[], char *names
     cgx->ISNewNumber(dev, name, values, names, n);
 }
 
-void ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[], char *formats[],
-               char *names[], int n)
+void ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[],
+               char *formats[], char *names[], int n)
 {
     cgx->ISNewBLOB(dev, name, sizes, blobsizes, blobs, formats, names, n);
 }
@@ -63,18 +64,8 @@ void ISSnoopDevice(XMLEle *root)
     cgx->ISSnoopDevice(root);
 }
 
-double decimalHoursToDecimalDegrees(double decimalHours)
-{
-    return (decimalHours * 360.0) / 24.0;
-}
-
-double decimalDegreesToDecimalHours(double decimalDegrees)
-{
-    return (decimalDegrees * 24.0) / 360.0;
-}
-
 const uint32_t CelestronCGX::STEPS_PER_REVOLUTION = 0x1000000;
-const double CelestronCGX::STEPS_PER_DEGREE = STEPS_PER_REVOLUTION / 360.0;
+const double CelestronCGX::STEPS_PER_DEGREE       = STEPS_PER_REVOLUTION / 360.0;
 
 CelestronCGX::CelestronCGX() : m_alignment(STEPS_PER_REVOLUTION)
 {
@@ -91,44 +82,46 @@ bool CelestronCGX::initProperties()
     /* Make sure to init parent properties first */
     INDI::Telescope::initProperties();
 
-    SetTelescopeCapability(TELESCOPE_CAN_PARK | TELESCOPE_CAN_SYNC | TELESCOPE_CAN_GOTO | TELESCOPE_CAN_ABORT |
-                               TELESCOPE_HAS_TIME | TELESCOPE_HAS_LOCATION | TELESCOPE_HAS_TRACK_MODE |
-                               TELESCOPE_CAN_CONTROL_TRACK | TELESCOPE_HAS_PIER_SIDE,
+    SetTelescopeCapability(TELESCOPE_CAN_PARK | TELESCOPE_CAN_SYNC | TELESCOPE_CAN_GOTO |
+                               TELESCOPE_CAN_ABORT | TELESCOPE_HAS_TIME | TELESCOPE_HAS_LOCATION |
+                               TELESCOPE_HAS_TRACK_MODE | TELESCOPE_CAN_CONTROL_TRACK |
+                               TELESCOPE_HAS_PIER_SIDE,
                            4);
     SetParkDataType(PARK_RA_DEC_ENCODER);
 
-    IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%.0f", 0, STEPS_PER_REVOLUTION - 1, 1,
-                 m_alignment.GetStepsAtHomePositionRA());
-    IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%.0f", 0, STEPS_PER_REVOLUTION - 1,
-                 1, m_alignment.GetStepsAtHomePositionDec());
-    IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS", "Encoder Ticks",
-                       MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
+    IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%.0f", 0,
+                 STEPS_PER_REVOLUTION - 1, 1, m_alignment.GetStepsAtHomePositionRA());
+    IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%.0f", 0,
+                 STEPS_PER_REVOLUTION - 1, 1, m_alignment.GetStepsAtHomePositionDec());
+    IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS",
+                       "Encoder Ticks", MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
 
     IUFillNumber(&LocationDebugN[0], "HA", "HA (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumber(&LocationDebugN[1], "LST", "LST (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
-    IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG", "Mount Pointing", MAIN_CONTROL_TAB,
-                       IP_RO, 60, IPS_IDLE);
+    IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG",
+                       "Mount Pointing", MAIN_CONTROL_TAB, IP_RO, 60, IPS_IDLE);
 
-    // Add Tracking Modes, the order must match the order of the TelescopeTrackMode enum
+    // Add Tracking Modes, the order must match the order of the
+    // TelescopeTrackMode enum
     AddTrackMode("TRACK_SIDEREAL", "Sidereal", true);
     AddTrackMode("TRACK_SOLAR", "Solar");
     AddTrackMode("TRACK_LUNAR", "Lunar");
 
     IUFillSwitch(&AlignS[0], "ALIGN", "Align", ISS_OFF);
-    IUFillSwitchVector(&AlignSP, AlignS, 1, getDeviceName(), "ALIGN", "Align", MAIN_CONTROL_TAB, IP_RW, ISR_ATMOST1, 0,
-                       IPS_IDLE);
+    IUFillSwitchVector(&AlignSP, AlignS, 1, getDeviceName(), "ALIGN", "Align", MAIN_CONTROL_TAB,
+                       IP_RW, ISR_ATMOST1, 0, IPS_IDLE);
 
     IUFillText(&VersionT[AXIS_RA], "VERSION_RA", "RA Motor Version", "");
     IUFillText(&VersionT[AXIS_DE], "VERSION_DEC", "Dec Motor Version", "");
-    IUFillTextVector(&VersionTP, VersionT, 2, getDeviceName(), "CGX_VERSION", "CGX Version", OPTIONS_TAB, IP_RO, 0,
-                     IPS_IDLE);
+    IUFillTextVector(&VersionTP, VersionT, 2, getDeviceName(), "CGX_VERSION", "CGX Version",
+                     OPTIONS_TAB, IP_RO, 0, IPS_IDLE);
 
     initGuiderProperties(getDeviceName(), GUIDE_TAB);
     /* How fast do we guide compared to sidereal rate */
     IUFillNumber(&GuideRateN[AXIS_RA], "GUIDE_RATE_WE", "W/E Rate", "%.f", 10, 100, 1, 50);
     IUFillNumber(&GuideRateN[AXIS_DE], "GUIDE_RATE_NS", "N/S Rate", "%.f", 10, 100, 1, 50);
-    IUFillNumberVector(&GuideRateNP, GuideRateN, 2, getDeviceName(), "GUIDE_RATE", "Guiding Rate", GUIDE_TAB, IP_RW, 0,
-                       IPS_IDLE);
+    IUFillNumberVector(&GuideRateNP, GuideRateN, 2, getDeviceName(), "GUIDE_RATE", "Guiding Rate",
+                       GUIDE_TAB, IP_RW, 0, IPS_IDLE);
 
     /* Add debug controls so we may debug driver if necessary */
     addDebugControl();
@@ -168,13 +161,15 @@ bool CelestronCGX::updateProperties()
 
         if (InitPark())
         {
-            // If loading parking data is successful, we just set the default parking values.
+            // If loading parking data is successful, we just set the default
+            // parking values.
             SetAxis1ParkDefault(m_alignment.GetStepsAtHomePositionRA());
             SetAxis2ParkDefault(m_alignment.GetStepsAtHomePositionDec());
         }
         else
         {
-            // Otherwise, we set all parking data to default in case no parking data is found.
+            // Otherwise, we set all parking data to default in case no parking
+            // data is found.
             SetAxis1Park(m_alignment.GetStepsAtHomePositionRA());
             SetAxis2Park(m_alignment.GetStepsAtHomePositionDec());
 
@@ -198,10 +193,10 @@ bool CelestronCGX::updateProperties()
     return true;
 }
 
-bool CelestronCGX::ISNewNumber(const char *dev, const char *name, double values[], char *names[], int n)
+bool CelestronCGX::ISNewNumber(const char *dev, const char *name, double values[], char *names[],
+                               int n)
 {
     //  first check if it's for our device
-
     if (dev != nullptr && strcmp(dev, getDeviceName()) == 0)
     {
         if (strcmp(name, "GUIDE_RATE") == 0)
@@ -214,7 +209,8 @@ bool CelestronCGX::ISNewNumber(const char *dev, const char *name, double values[
         }
 
         processGuiderProperties(name, values, names, n);
-        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentNumberProperties(this, name, values, names, n);
+        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentNumberProperties(
+            this, name, values, names, n);
     }
 
     //  if we didn't process it, continue up the chain, let somebody else
@@ -222,7 +218,8 @@ bool CelestronCGX::ISNewNumber(const char *dev, const char *name, double values[
     return INDI::Telescope::ISNewNumber(dev, name, values, names, n);
 }
 
-bool CelestronCGX::ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int n)
+bool CelestronCGX::ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[],
+                               int n)
 {
     if (dev != nullptr && strcmp(dev, getDeviceName()) == 0)
     {
@@ -237,19 +234,21 @@ bool CelestronCGX::ISNewSwitch(const char *dev, const char *name, ISState *state
             return true;
         }
 
-        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentSwitchProperties(this, name, states, names, n);
+        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentSwitchProperties(
+            this, name, states, names, n);
     }
 
     //  Nobody has claimed this, so, ignore it
     return INDI::Telescope::ISNewSwitch(dev, name, states, names, n);
 }
 
-bool CelestronCGX::ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[],
-                             char *formats[], char *names[], int n)
+bool CelestronCGX::ISNewBLOB(const char *dev, const char *name, int sizes[], int blobsizes[],
+                             char *blobs[], char *formats[], char *names[], int n)
 {
     if (dev != nullptr && strcmp(dev, getDeviceName()) == 0)
     {
-        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentBLOBProperties(this, name, sizes, blobsizes, blobs, formats, names, n);
+        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentBLOBProperties(
+            this, name, sizes, blobsizes, blobs, formats, names, n);
     }
     // Pass it up the chain
     return INDI::Telescope::ISNewBLOB(dev, name, sizes, blobsizes, blobs, formats, names, n);
@@ -259,7 +258,8 @@ bool CelestronCGX::ISNewText(const char *dev, const char *name, char *texts[], c
 {
     if (dev != nullptr && strcmp(dev, getDeviceName()) == 0)
     {
-        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentTextProperties(this, name, texts, names, n);
+        INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::ProcessAlignmentTextProperties(
+            this, name, texts, names, n);
     }
     // Pass it up the chain
     return INDI::Telescope::ISNewText(dev, name, texts, names, n);
@@ -304,8 +304,8 @@ bool CelestronCGX::Handshake()
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::Initialise(this);
 
     ISwitchVectorProperty *activateAlignmentSubsystem = getSwitch("ALIGNMENT_SUBSYSTEM_ACTIVE");
-    activateAlignmentSubsystem->sp[0].s = ISS_ON;
-    activateAlignmentSubsystem->s = IPS_OK;
+    activateAlignmentSubsystem->sp[0].s               = ISS_ON;
+    activateAlignmentSubsystem->s                     = IPS_OK;
     IDSetSwitch(activateAlignmentSubsystem, nullptr);
 
     ISwitchVectorProperty *mathPlugins = getSwitch("ALIGNMENT_SUBSYSTEM_MATH_PLUGINS");
@@ -351,7 +351,7 @@ bool CelestronCGX::startAlign()
     AlignSP.s = IPS_BUSY;
     IDSetSwitch(&AlignSP, nullptr);
 
-    m_raAligned = false;
+    m_raAligned  = false;
     m_decAligned = false;
 
     m_driver.StartAlign(AXIS_RA);
@@ -400,11 +400,12 @@ bool CelestronCGX::ReadScopeStatus()
             m_driver.GetPosition(AXIS_RA);
             m_driver.GetPosition(AXIS_DE);
 
-            AlignSP.s = IPS_OK;
+            AlignSP.s   = IPS_OK;
             AlignS[0].s = ISS_OFF;
             IDSetSwitch(&AlignSP, nullptr);
 
-            INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::SetApproximateMountAlignmentFromMountType(EQUATORIAL);
+            INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::
+                SetApproximateMountAlignmentFromMountType(EQUATORIAL);
 
             GetAlignmentDatabase().clear();
             UpdateSize();
@@ -434,7 +435,7 @@ bool CelestronCGX::ReadScopeStatus()
 
                 delete m_raTarget;
                 delete m_decTarget;
-                m_raTarget = nullptr;
+                m_raTarget  = nullptr;
                 m_decTarget = nullptr;
             }
             else
@@ -576,7 +577,7 @@ bool CelestronCGX::SetParkPosition(double Axis1Value, double Axis2Value)
 
 bool CelestronCGX::Sync(double ra, double dec)
 {
-    ra = range24(ra);
+    ra  = range24(ra);
     dec = rangeDec(dec);
 
     double mountRA, mountDec;
@@ -591,11 +592,11 @@ bool CelestronCGX::Sync(double ra, double dec)
 // common code for GoTo and park
 void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
 {
-    ra = range24(ra);
+    ra  = range24(ra);
     dec = rangeDec(dec);
 
     RememberTrackState = TrackState;
-    TrackState = SCOPE_SLEWING;
+    TrackState         = SCOPE_SLEWING;
 
     double targetRA, targetDec;
     SkyToTelescopeEquatorial(ra, dec, targetRA, targetDec);
@@ -604,35 +605,41 @@ void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
 
     TelescopePierSide targetPierSide;
     uint32_t targetRASteps, targetDecSteps;
-    m_alignment.EncoderValuesFromRADec(targetRA, targetDec, targetRASteps, targetDecSteps, targetPierSide);
+    m_alignment.EncoderValuesFromRADec(targetRA, targetDec, targetRASteps, targetDecSteps,
+                                       targetPierSide);
 
     // TODO: Should we be comparing mount or sky here?
     double currentRA, currentDec;
     TelescopePierSide currentPierSide;
     getMountPosition(currentRA, currentDec, currentPierSide);
 
-    uint32_t currentRASteps = uint32_t(EncoderTicksN[AXIS_RA].value);
+    uint32_t currentRASteps  = uint32_t(EncoderTicksN[AXIS_RA].value);
     uint32_t currentDecSteps = uint32_t(EncoderTicksN[AXIS_DE].value);
 
-    LOGF_INFO("Slewing RA from %8.3f (%d) to %8.3f (%d)", currentRA, currentRASteps, targetRA, targetRASteps);
-    LOGF_INFO("Slewing Dec from %8.3f (%d) to %8.3f (%d)", currentDec, currentDecSteps, targetDec, targetDecSteps);
+    LOGF_INFO("Slewing RA from %8.3f (%d) to %8.3f (%d)", currentRA, currentRASteps, targetRA,
+              targetRASteps);
+    LOGF_INFO("Slewing Dec from %8.3f (%d) to %8.3f (%d)", currentDec, currentDecSteps, targetDec,
+              targetDecSteps);
     LOGF_INFO("Slewing from pier side %d to %d", currentPierSide, targetPierSide);
 
     if (!skipPierSideCheck && currentPierSide != targetPierSide)
     {
-        // The mount will take the shortest distance to the new stepper count, so make sure we go
-        // through home if we would otherwise do something crazy do something crazy.
+        // The mount will take the shortest distance to the new stepper count,
+        // so make sure we go through home if we would otherwise do something
+        // crazy do something crazy.
 
-        if (std::abs(long(targetRASteps) - long(currentRASteps)) > long(STEPS_PER_REVOLUTION / 2) || std::abs(long(targetDecSteps) - long(currentDecSteps)) > long(STEPS_PER_REVOLUTION / 2))
+        if (std::abs(long(targetRASteps) - long(currentRASteps)) > long(STEPS_PER_REVOLUTION / 2) ||
+            std::abs(long(targetDecSteps) - long(currentDecSteps)) > long(STEPS_PER_REVOLUTION / 2))
         {
-            m_raTarget = new double(ra);
+            m_raTarget  = new double(ra);
             m_decTarget = new double(dec);
 
-            // Let's go back to home since we are changing pier sides. The mount otherwise wants to
-            // take shortest distance, which can be wrong.
+            // Let's go back to home since we are changing pier sides. The mount
+            // otherwise wants to take shortest distance, which can be wrong.
             // Takes a little longer to slew, but keeps things simple.
 
-            LOGF_INFO("slewing to home, then to %f %f, %d, %d", ra, dec, targetRASteps, targetDecSteps);
+            LOGF_INFO("slewing to home, then to %f %f, %d, %d", ra, dec, targetRASteps,
+                      targetDecSteps);
 
             m_driver.GoToFast(AXIS_RA, m_alignment.GetStepsAtHomePositionRA());
             m_driver.GoToFast(AXIS_DE, m_alignment.GetStepsAtHomePositionDec());
@@ -643,7 +650,7 @@ void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
 
     bool raClose, decClose = false;
 
-    raClose = std::abs(long(targetRASteps) - long(currentRASteps)) < long(STEPS_PER_DEGREE * 4);
+    raClose  = std::abs(long(targetRASteps) - long(currentRASteps)) < long(STEPS_PER_DEGREE * 4);
     decClose = std::abs(long(targetDecSteps) - long(currentDecSteps)) < long(STEPS_PER_DEGREE * 4);
 
     m_manualSlew = false;
@@ -660,7 +667,7 @@ void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
         // Set our actual target here.
         // Once we are done with the fast slew, we will do another slow slew
         // so we are more accurate
-        m_raTarget = new double(ra);
+        m_raTarget  = new double(ra);
         m_decTarget = new double(dec);
 
         m_driver.GoToFast(AXIS_RA, targetRASteps - long(STEPS_PER_DEGREE * 1));
@@ -704,7 +711,7 @@ bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
     }
 
     m_manualSlew = true;
-    TrackState = SCOPE_SLEWING;
+    TrackState   = SCOPE_SLEWING;
 
     if (dir == DIRECTION_NORTH)
     {
@@ -729,7 +736,7 @@ bool CelestronCGX::MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command)
     }
 
     m_manualSlew = true;
-    TrackState = SCOPE_SLEWING;
+    TrackState   = SCOPE_SLEWING;
 
     if (dir == DIRECTION_EAST)
     {
@@ -751,7 +758,8 @@ bool CelestronCGX::updateLocation(double latitude, double longitude, double elev
     LOGF_INFO("Update location %8.3f, %8.3f, %4.0f", latitude, longitude, elevation);
 
     m_alignment.UpdateLongitude(longitude);
-    INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::UpdateLocation(latitude, longitude, elevation);
+    INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::UpdateLocation(latitude, longitude,
+                                                                           elevation);
 
     return true;
 }
@@ -806,16 +814,17 @@ IPState CelestronCGX::GuideWest(uint32_t ms)
 void CelestronCGX::getMountPosition(double &ra, double &dec, TelescopePierSide &pierSide)
 {
     uint32_t raSteps, decSteps;
-    raSteps = uint32_t(EncoderTicksN[AXIS_RA].value);
+    raSteps  = uint32_t(EncoderTicksN[AXIS_RA].value);
     decSteps = uint32_t(EncoderTicksN[AXIS_DE].value);
     m_alignment.RADecFromEncoderValues(raSteps, decSteps, ra, dec, pierSide);
 }
 
 // AlignmentSubsystem
-// TODO: Once https://github.com/indilib/indi/pull/1303 is in the stable release,
-// remove these and use the methods there.
+// TODO: Once https://github.com/indilib/indi/pull/1303 is in the stable
+// release, remove these and use the methods there.
 
-bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA, double mountDec)
+bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA,
+                                               double mountDec)
 {
     ln_lnlat_posn location;
     if (!GetDatabaseReferencePosition(location))
@@ -828,17 +837,18 @@ bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec
     {
         0, 0
     };
-    RaDec.ra = range360(((LST - mountRA) * 360.0) / 24.0);
+    RaDec.ra  = range360(((LST - mountRA) * 360.0) / 24.0);
     RaDec.dec = mountDec;
 
     INDI::AlignmentSubsystem::AlignmentDatabaseEntry NewEntry;
-    INDI::AlignmentSubsystem::TelescopeDirectionVector TDV = TelescopeDirectionVectorFromLocalHourAngleDeclination(RaDec);
+    INDI::AlignmentSubsystem::TelescopeDirectionVector TDV =
+        TelescopeDirectionVectorFromLocalHourAngleDeclination(RaDec);
 
     NewEntry.ObservationJulianDate = ln_get_julian_from_sys();
-    NewEntry.RightAscension = actualRA;
-    NewEntry.Declination = actualDec;
-    NewEntry.TelescopeDirection = TDV;
-    NewEntry.PrivateDataSize = 0;
+    NewEntry.RightAscension        = actualRA;
+    NewEntry.Declination           = actualDec;
+    NewEntry.TelescopeDirection    = TDV;
+    NewEntry.PrivateDataSize       = 0;
 
     if (!CheckForDuplicateSyncPoint(NewEntry))
     {
@@ -854,14 +864,15 @@ bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec
     return false;
 }
 
-bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA, double &mountDec)
+bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA,
+                                            double &mountDec)
 {
     ln_equ_posn eq{0, 0};
     INDI::AlignmentSubsystem::TelescopeDirectionVector TDV;
     ln_lnlat_posn location;
 
     // by default, just return what we were given
-    mountRA = actualRA;
+    mountRA  = actualRA;
     mountDec = actualDec;
 
     if (!GetDatabaseReferencePosition(location))
@@ -877,9 +888,9 @@ bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, d
 
             //  and now we have to convert from lha back to RA
             double LST = get_local_sidereal_time(location.lng);
-            eq.ra = eq.ra * 24 / 360;
-            mountRA = range24(LST - eq.ra);
-            mountDec = eq.dec;
+            eq.ra      = eq.ra * 24 / 360;
+            mountRA    = range24(LST - eq.ra);
+            mountDec   = eq.dec;
 
             return true;
         }
@@ -888,13 +899,14 @@ bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, d
     return false;
 }
 
-bool CelestronCGX::TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA, double &actualDec)
+bool CelestronCGX::TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA,
+                                            double &actualDec)
 {
     ln_equ_posn eq{0, 0};
     ln_lnlat_posn location;
 
     // by default, just return what we were given
-    actualRA = mountRA;
+    actualRA  = mountRA;
     actualDec = mountDec;
 
     if (!GetDatabaseReferencePosition(location))
@@ -910,7 +922,7 @@ bool CelestronCGX::TelescopeEquatorialToSky(double mountRA, double mountDec, dou
         lst = get_local_sidereal_time(location.lng);
         lha = get_local_hour_angle(lst, mountRA);
 
-        eq.ra = lha * 360.0 / 24.0;
+        eq.ra  = lha * 360.0 / 24.0;
         eq.dec = mountDec;
 
         TDV = TelescopeDirectionVectorFromLocalHourAngleDeclination(eq);

@@ -11,5 +11,7 @@
         "type_traits": "cpp",
         "new": "cpp"
     },
-    "remote.autoForwardPorts": false
+    "remote.autoForwardPorts": false,
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Microsoft, IndentWidth: 4, AlignConsecutiveDeclarations: false, AlignConsecutiveAssignments: true, BreakBeforeBraces: Allman, ColumnLimit: 100 }"
 }

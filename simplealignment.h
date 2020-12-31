@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <libindi/inditelescope.h>
+#include <stdint.h>
 
 using namespace INDI;
 
@@ -28,7 +28,7 @@ Simple class to map steps on a motor to RA/Dec and back on an EQ mount.
 */
 class EQAlignment
 {
-public:
+  public:
     EQAlignment(uint32_t stepsPerRevolution);
 
     void UpdateLongitude(double lng);
@@ -36,24 +36,30 @@ public:
     void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
                                 Telescope::TelescopePierSide &pierSide);
 
-    void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps,
-                                double &ra, double &dec,
+    void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
                                 Telescope::TelescopePierSide &pierSide);
 
     double hourAngleFromEncoder(uint32_t raSteps);
     uint32_t encoderFromHourAngle(double hourAngle);
 
-    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec, Telescope::TelescopePierSide &pierSide);
+    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec,
+                                   Telescope::TelescopePierSide &pierSide);
     uint32_t encoderFromDecAndPierSide(double dec, Telescope::TelescopePierSide pierSide);
 
     double localSiderealTime();
 
     Telescope::TelescopePierSide expectedPierSide(double ra);
 
-    uint32_t GetStepsAtHomePositionDec() { return m_stepsAtHomePositionDec; }
-    uint32_t GetStepsAtHomePositionRA() { return m_stepsAtHomePositionRA; }
+    uint32_t GetStepsAtHomePositionDec()
+    {
+        return m_stepsAtHomePositionDec;
+    }
+    uint32_t GetStepsAtHomePositionRA()
+    {
+        return m_stepsAtHomePositionRA;
+    }
 
-private:
+  private:
     uint32_t m_stepsPerRevolution;
     uint32_t m_stepsAtHomePositionDec;
     uint32_t m_stepsAtHomePositionRA;

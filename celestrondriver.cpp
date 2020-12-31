@@ -209,7 +209,8 @@ bool CelestronDriver::readCmd(int timeout)
     }
 
     // Read the rest of the packet and verify the length. Add one for the checksum byte.
-    success = tty_read(PortFD, (char *)(buf + 2), buf[1] + 1, timeout, &n) == TTY_OK && n == buf[1] + 1;
+    success =
+        tty_read(PortFD, (char *)(buf + 2), buf[1] + 1, timeout, &n) == TTY_OK && n == buf[1] + 1;
     if (!success)
     {
         LOG_ERROR("error reading packet");
