@@ -673,7 +673,10 @@ void CelestronCGX::StartSlew(double ra, double dec, TelescopeStatus status, bool
     }
     else
     {
-        m_driver.GoToFast(AXIS_RA, targetRASteps);
+        m_raTarget = new double(ra);
+        m_decTarget = new double(dec);
+
+        m_driver.GoToFast(AXIS_RA, targetRASteps - long(STEPS_PER_DEGREE * 1));
         m_driver.GoToFast(AXIS_DE, targetDecSteps);
     }
 
