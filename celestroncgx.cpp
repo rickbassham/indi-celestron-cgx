@@ -133,6 +133,11 @@ bool CelestronCGX::initProperties()
 
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::InitAlignmentProperties(this);
 
+    // Force Location Update
+    IUFillSwitch(&ForceLocationS[0], "FORCE_LOCATION", "Force Location Update", ISS_OFF);
+    IUFillSwitchVector(&ForceLocationSP, ForceLocationS, 1, getDeviceName(), "FORCE_LOCATION",
+                       "Location", ALIGNMENT_TAB, IP_RW, ISR_ATMOST1, 0, IPS_IDLE);
+
     serialConnection->setDefaultBaudRate(Connection::Serial::BaudRate::B_115200);
 
     setDefaultPollingPeriod(250);
@@ -148,6 +153,8 @@ void CelestronCGX::ISGetProperties(const char *dev)
 bool CelestronCGX::updateProperties()
 {
     INDI::Telescope::updateProperties();
+
+    defineSwitch(&ForceLocationSP);
 
     if (isConnected())
     {
@@ -233,6 +240,16 @@ bool CelestronCGX::ISNewSwitch(const char *dev, const char *name, ISState *state
                 return false;
 
             startAlign();
+
+            return true;
+        }
+
+        if (strcmp(name, ForceLocationSP.name) == 0)
+        {
+            if (IUUpdateSwitch(&ForceLocationSP, states, names, n) < 0)
+                return false;
+
+            forceAlignmentPosition();
 
             return true;
         }
@@ -360,6 +377,19 @@ bool CelestronCGX::startAlign()
 
     m_driver.StartAlign(AXIS_RA);
     m_driver.StartAlign(AXIS_DE);
+
+    return true;
+}
+
+bool CelestronCGX::forceAlignmentPosition()
+{
+    GetAlignmentDatabase().clear();
+    UpdateSize();
+    SetDatabaseReferencePosition(lnobserver.lat, lnobserver.lng);
+
+    ForceLocationS[0].s = ISS_OFF;
+    ForceLocationSP.s   = IPS_IDLE;
+    IDSetSwitch(&ForceLocationSP, nullptr);
 
     return true;
 }
@@ -766,6 +796,9 @@ bool CelestronCGX::saveConfigItems(FILE *fp)
 bool CelestronCGX::updateLocation(double latitude, double longitude, double elevation)
 {
     m_alignment.UpdateLongitude(longitude);
+
+    INDI::AlignmentSubsystem::InMemoryDatabase::SetDatabaseReferencePosition(latitude, longitude);
+
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::UpdateLocation(latitude, longitude,
                                                                            elevation);
 

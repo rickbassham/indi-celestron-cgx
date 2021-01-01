@@ -144,6 +144,9 @@ class CelestronCGX : public INDI::Telescope,
     ISwitch AlignS[1];
     ISwitchVectorProperty AlignSP;
 
+    ISwitch ForceLocationS[1];
+    ISwitchVectorProperty ForceLocationSP;
+
     IText VersionT[2];
     ITextVectorProperty VersionTP;
 
@@ -161,6 +164,7 @@ class CelestronCGX : public INDI::Telescope,
     double *m_decTarget{nullptr};
 
     bool startAlign();
+    bool forceAlignmentPosition();
 
     CelestronDriver m_driver;
 
