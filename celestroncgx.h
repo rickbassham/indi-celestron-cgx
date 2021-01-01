@@ -130,7 +130,7 @@ class CelestronCGX : public INDI::Telescope,
     static const double STEPS_PER_DEGREE;
 
     /// used by GoTo and Park
-    void StartSlew(double ra, double dec, bool skipPierSideCheck = false);
+    bool StartSlew(double ra, double dec, bool skipPierSideCheck = false);
 
     INumber LocationDebugN[2];
     INumberVectorProperty LocationDebugNP;

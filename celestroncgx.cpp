@@ -268,6 +268,7 @@ bool CelestronCGX::ISNewText(const char *dev, const char *name, char *texts[], c
 bool CelestronCGX::Connect()
 {
     LOG_INFO("CGX is online.");
+
     SetTimer(POLLMS);
 
     return INDI::Telescope::Connect();
@@ -471,8 +472,7 @@ bool CelestronCGX::ReadScopeStatus()
 
 bool CelestronCGX::Goto(double r, double d)
 {
-    StartSlew(r, d);
-    return true;
+    return StartSlew(r, d);
 }
 
 bool CelestronCGX::Abort()
@@ -590,18 +590,23 @@ bool CelestronCGX::Sync(double ra, double dec)
 }
 
 // common code for GoTo and park
-void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
+bool CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
 {
+    if (isParked())
+    {
+        LOG_ERROR("Please unpark the mount before issuing any motion commands.");
+        return false;
+    }
+
     ra  = range24(ra);
     dec = rangeDec(dec);
 
-    RememberTrackState = TrackState;
-    TrackState         = SCOPE_SLEWING;
+    TrackState = SCOPE_SLEWING;
 
     double targetRA, targetDec;
     SkyToTelescopeEquatorial(ra, dec, targetRA, targetDec);
 
-    LOGF_INFO("ra, dec: %8.3f, %8.3f; target ra, dec: %8.3f, %8.3f", ra, dec, targetRA, targetDec);
+    IDLog("ra, dec: %8.3f, %8.3f; target ra, dec: %8.3f, %8.3f\n", ra, dec, targetRA, targetDec);
 
     TelescopePierSide targetPierSide;
     uint32_t targetRASteps, targetDecSteps;
@@ -616,11 +621,11 @@ void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
     uint32_t currentRASteps  = uint32_t(EncoderTicksN[AXIS_RA].value);
     uint32_t currentDecSteps = uint32_t(EncoderTicksN[AXIS_DE].value);
 
-    LOGF_INFO("Slewing RA from %8.3f (%d) to %8.3f (%d)", currentRA, currentRASteps, targetRA,
-              targetRASteps);
-    LOGF_INFO("Slewing Dec from %8.3f (%d) to %8.3f (%d)", currentDec, currentDecSteps, targetDec,
-              targetDecSteps);
-    LOGF_INFO("Slewing from pier side %d to %d", currentPierSide, targetPierSide);
+    IDLog("Slewing RA from %8.3f (%d) to %8.3f (%d)\n", currentRA, currentRASteps, targetRA,
+          targetRASteps);
+    IDLog("Slewing Dec from %8.3f (%d) to %8.3f (%d)\n", currentDec, currentDecSteps, targetDec,
+          targetDecSteps);
+    IDLog("Slewing from pier side %d to %d\n", currentPierSide, targetPierSide);
 
     if (!skipPierSideCheck && currentPierSide != targetPierSide)
     {
@@ -644,7 +649,7 @@ void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
             m_driver.GoToFast(AXIS_RA, m_alignment.GetStepsAtHomePositionRA());
             m_driver.GoToFast(AXIS_DE, m_alignment.GetStepsAtHomePositionDec());
 
-            return;
+            return true;
         }
     }
 
@@ -675,6 +680,8 @@ void CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
 
         LOGF_INFO("slewing to %f %f (%d, %d)", ra, dec, targetRASteps, targetDecSteps);
     }
+
+    return true;
 }
 
 CelestronDriver::SlewRate CelestronCGX::slewRate()
@@ -698,7 +705,7 @@ CelestronDriver::SlewRate CelestronCGX::slewRate()
 
 bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
 {
-    if (TrackState == SCOPE_PARKED)
+    if (isParked())
     {
         LOG_ERROR("Please unpark the mount before issuing any motion commands.");
         return false;
@@ -723,7 +730,7 @@ bool CelestronCGX::MoveNS(INDI_DIR_NS dir, TelescopeMotionCommand command)
 
 bool CelestronCGX::MoveWE(INDI_DIR_WE dir, TelescopeMotionCommand command)
 {
-    if (TrackState == SCOPE_PARKED)
+    if (isParked())
     {
         LOG_ERROR("Please unpark the mount before issuing any motion commands.");
         return false;
@@ -755,8 +762,6 @@ bool CelestronCGX::saveConfigItems(FILE *fp)
 
 bool CelestronCGX::updateLocation(double latitude, double longitude, double elevation)
 {
-    LOGF_INFO("Update location %8.3f, %8.3f, %4.0f", latitude, longitude, elevation);
-
     m_alignment.UpdateLongitude(longitude);
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::UpdateLocation(latitude, longitude,
                                                                            elevation);
@@ -769,7 +774,7 @@ bool CelestronCGX::updateLocation(double latitude, double longitude, double elev
 
 IPState CelestronCGX::GuideNorth(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: N %d ms", ms);
+    IDLog("Guiding: N %d ms\n", ms);
 
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_DE].value);
 
@@ -780,7 +785,7 @@ IPState CelestronCGX::GuideNorth(uint32_t ms)
 
 IPState CelestronCGX::GuideSouth(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: S %d ms", ms);
+    IDLog("Guiding: S %d ms\n", ms);
 
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_DE].value);
 
@@ -791,7 +796,7 @@ IPState CelestronCGX::GuideSouth(uint32_t ms)
 
 IPState CelestronCGX::GuideEast(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: E %d ms", ms);
+    IDLog("Guiding: E %d ms\n", ms);
 
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_RA].value);
 
@@ -802,7 +807,7 @@ IPState CelestronCGX::GuideEast(uint32_t ms)
 
 IPState CelestronCGX::GuideWest(uint32_t ms)
 {
-    LOGF_DEBUG("Guiding: W %d ms", ms);
+    IDLog("Guiding: W %d ms\n", ms);
 
     int8_t rate = static_cast<int8_t>(GuideRateN[AXIS_RA].value);
 
