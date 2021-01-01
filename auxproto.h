@@ -58,9 +58,6 @@ enum AUXtargets
     LIGHT = 0xbf
 };
 
-void prnBytes(unsigned char *b, int n);
-void dumpMsg(buffer buf);
-
 class AUXCommand
 {
   public:
@@ -77,10 +74,6 @@ class AUXCommand
     void setRate(unsigned char r);
     unsigned char checksum(buffer buf);
     void dumpCmd();
-    const char *cmd_name(AUXCommands c);
-    int response_data_size();
-    const char *node_name(AUXtargets n);
-    void pprint();
 
     AUXCommands cmd;
     AUXtargets src, dst;

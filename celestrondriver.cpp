@@ -245,7 +245,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
             return m_handler->HandleGetVersion(AXIS_RA, version);
         }
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -257,7 +257,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleGetPosition(AXIS_RA, cmd.getPosition());
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -269,7 +269,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleStartAlign(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -281,7 +281,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleAlignDone(AXIS_RA, cmd.data.size() > 0 && cmd.data[0] == 0xff);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -293,7 +293,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleMoveNegative(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -305,7 +305,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleMovePositive(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -317,7 +317,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleGotoFast(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -329,7 +329,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleGotoSlow(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -341,7 +341,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleSetPosition(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -351,7 +351,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleTrack();
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -363,7 +363,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleSlewDone(AXIS_RA, cmd.data[0] != 0x00);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -375,7 +375,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleGetAutoguideRate(AXIS_RA, cmd.data[0] * 100.0 / 255);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -387,7 +387,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleSetAutoguideRate(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -399,7 +399,7 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleGuidePulse(AXIS_RA);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
 
@@ -411,16 +411,13 @@ bool CelestronDriver::handleCommand(AUXCommand cmd)
         case RA:
             return m_handler->HandleGuidePulseDone(AXIS_RA, cmd.data[0] == 0x00);
         default:
-            fprintf(stderr, "unknown src 0x%02x\n", cmd.src);
+            IDLog("unknown src 0x%02x\n", cmd.src);
         }
         break;
     }
 
-    fprintf(stderr, "unknown command 0x%02x ", cmd.cmd);
-
-    buffer b;
-    cmd.fillBuf(b);
-    dumpMsg(b);
+    IDLog("unknown command 0x%02x ", cmd.cmd);
+    cmd.dumpCmd();
 
     return true;
 }
