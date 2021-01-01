@@ -125,7 +125,6 @@ unsigned char AUXCommand::checksum(buffer buf)
 // AUX commands use 24bit integer as a representation of angle in units of
 // fractional revolutions. Thus 2^24 steps makes full revolution.
 const long STEPS_PER_REVOLUTION = 16777216;
-const double STEPS_PER_DEGREE   = STEPS_PER_REVOLUTION / 360.0;
 
 long AUXCommand::getPosition()
 {

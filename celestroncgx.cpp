@@ -70,6 +70,11 @@ const double CelestronCGX::STEPS_PER_DEGREE       = STEPS_PER_REVOLUTION / 360.0
 CelestronCGX::CelestronCGX() : m_alignment(STEPS_PER_REVOLUTION)
 {
     setVersion(CCGX_VERSION_MAJOR, CCGX_VERSION_MINOR);
+    SetTelescopeCapability(TELESCOPE_CAN_PARK | TELESCOPE_CAN_SYNC | TELESCOPE_CAN_GOTO |
+                               TELESCOPE_CAN_ABORT | TELESCOPE_HAS_LOCATION |
+                               TELESCOPE_HAS_TRACK_MODE | TELESCOPE_CAN_CONTROL_TRACK |
+                               TELESCOPE_HAS_PIER_SIDE,
+                           4);
 }
 
 const char *CelestronCGX::getDefaultName()
@@ -81,14 +86,10 @@ bool CelestronCGX::initProperties()
 {
     /* Make sure to init parent properties first */
     INDI::Telescope::initProperties();
-
-    SetTelescopeCapability(TELESCOPE_CAN_PARK | TELESCOPE_CAN_SYNC | TELESCOPE_CAN_GOTO |
-                               TELESCOPE_CAN_ABORT | TELESCOPE_HAS_TIME | TELESCOPE_HAS_LOCATION |
-                               TELESCOPE_HAS_TRACK_MODE | TELESCOPE_CAN_CONTROL_TRACK |
-                               TELESCOPE_HAS_PIER_SIDE,
-                           4);
+    setDriverInterface(getDriverInterface() | GUIDER_INTERFACE);
     SetParkDataType(PARK_RA_DEC_ENCODER);
 
+    // Encoder Values
     IUFillNumber(&EncoderTicksN[AXIS_RA], "ENCODER_TICKS_RA", "RA Encoder Ticks", "%.0f", 0,
                  STEPS_PER_REVOLUTION - 1, 1, m_alignment.GetStepsAtHomePositionRA());
     IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%.0f", 0,
@@ -96,6 +97,7 @@ bool CelestronCGX::initProperties()
     IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS",
                        "Encoder Ticks", MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
 
+    // Hour Angle and Local Sidereal Time
     IUFillNumber(&LocationDebugN[0], "HA", "HA (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumber(&LocationDebugN[1], "LST", "LST (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG",
@@ -107,15 +109,18 @@ bool CelestronCGX::initProperties()
     AddTrackMode("TRACK_SOLAR", "Solar");
     AddTrackMode("TRACK_LUNAR", "Lunar");
 
+    // Alignment Switch
     IUFillSwitch(&AlignS[0], "ALIGN", "Align", ISS_OFF);
     IUFillSwitchVector(&AlignSP, AlignS, 1, getDeviceName(), "ALIGN", "Align", MAIN_CONTROL_TAB,
                        IP_RW, ISR_ATMOST1, 0, IPS_IDLE);
 
+    // Firmware Version Info
     IUFillText(&VersionT[AXIS_RA], "VERSION_RA", "RA Motor Version", "");
     IUFillText(&VersionT[AXIS_DE], "VERSION_DEC", "Dec Motor Version", "");
     IUFillTextVector(&VersionTP, VersionT, 2, getDeviceName(), "CGX_VERSION", "CGX Version",
                      OPTIONS_TAB, IP_RO, 0, IPS_IDLE);
 
+    // Guide Properties
     initGuiderProperties(getDeviceName(), GUIDE_TAB);
     /* How fast do we guide compared to sidereal rate */
     IUFillNumber(&GuideRateN[AXIS_RA], "GUIDE_RATE_WE", "W/E Rate", "%.f", 10, 100, 1, 50);
@@ -127,8 +132,6 @@ bool CelestronCGX::initProperties()
     addDebugControl();
 
     INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::InitAlignmentProperties(this);
-
-    setDriverInterface(getDriverInterface() | GUIDER_INTERFACE);
 
     serialConnection->setDefaultBaudRate(Connection::Serial::BaudRate::B_115200);
 

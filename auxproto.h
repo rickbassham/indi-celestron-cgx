@@ -13,6 +13,7 @@ enum AUXCommands
     MC_SET_POSITION       = 0x04,
     MC_SET_POS_GUIDERATE  = 0x06,
     MC_SET_NEG_GUIDERATE  = 0x07,
+    MC_SWITCH_POSITION    = 0x09,
     MC_LEVEL_START        = 0x0b,
     MC_PEC_RECORD_START   = 0x0c,
     MC_PEC_PLAYBACK       = 0x0d,
@@ -51,11 +52,13 @@ enum AUXtargets
     RA    = 0x10,
     DEC   = 0x11,
     APP   = 0x20,
+    SWRA  = 0x30,
+    SWDEC = 0x31,
     GPS   = 0xb0,
     WiFi  = 0xb5,
     BAT   = 0xb6,
     CHG   = 0xb7,
-    LIGHT = 0xbf
+    LIGHT = 0xbf,
 };
 
 class AUXCommand
