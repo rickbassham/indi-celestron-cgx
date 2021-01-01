@@ -444,7 +444,8 @@ bool CelestronCGX::ReadScopeStatus()
             GetAlignmentDatabase().clear();
             UpdateSize();
 
-            LOG_INFO("CGX is now aligned");
+            LOG_INFO("CGX is now aligned, but sync points have been cleared; add 2 or more sync "
+                     "points to activate alignment subsystem");
         }
     }
 
@@ -474,6 +475,8 @@ bool CelestronCGX::ReadScopeStatus()
             }
             else
             {
+                LOG_INFO("arrived at target");
+
                 // Always track after slew
                 SetTrackEnabled(true);
             }
@@ -693,12 +696,22 @@ bool CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
 
     m_manualSlew = false;
 
-    if (raClose && decClose)
+    if (skipPierSideCheck && raClose && decClose)
     {
+        // It'll take us about 2 seconds to get where we are going from here,
+        // so let's intercept the moving target.
+        targetRASteps += 2 * (STEPS_PER_REVOLUTION / 24) / 3600;
+
         m_driver.GoToSlow(AXIS_RA, targetRASteps);
         m_driver.GoToSlow(AXIS_DE, targetDecSteps);
 
-        LOGF_INFO("approaching %f %f (%d, %d)", ra, dec, targetRASteps, targetDecSteps);
+        char RAStr[64] = {0};
+        fs_sexa(RAStr, targetRA, 2, 360000);
+        char DecStr[64] = {0};
+        fs_sexa(DecStr, targetDec, 2, 360000);
+
+        LOGF_INFO("approaching %f %f (%d, %d) (%s, %s)", ra, dec, targetRASteps, targetDecSteps,
+                  RAStr, DecStr);
     }
     else
     {
