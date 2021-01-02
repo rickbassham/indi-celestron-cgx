@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.2...v1.0.3) (2021-01-02)
+
+
+### Bug Fixes
+
+* fix deb name in raspbian build ([623e02b](https://github.com/rickbassham/indi-celestron-cgx/commit/623e02b272782756c071fe8bf86a1989bc5662f7))
+* fix deb name in ubuntu arm64 build ([39ed092](https://github.com/rickbassham/indi-celestron-cgx/commit/39ed0924b7b0bc2610355e26b499b24326957b1e))
+
 ## [1.0.2](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.1...v1.0.2) (2021-01-02)
 
 

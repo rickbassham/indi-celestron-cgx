@@ -1,4 +1,4 @@
-indi-celestron-cgx (1.0.2) UNRELEASED; urgency=medium
+indi-celestron-cgx (1.0.3) UNRELEASED; urgency=medium
 
   [ runner@fv-az128-843.thglmovbqukedp2komqfxyc2db.cx.internal.cloudapp.net ]
   * new release 1.0.2
@@ -9,7 +9,16 @@ indi-celestron-cgx (1.0.2) UNRELEASED; urgency=medium
   [  ]
   * sudo
 
- --  <runner@fv-az128-843.thglmovbqukedp2komqfxyc2db.cx.internal.cloudapp.net>  Sat, 02 Jan 2021 21:15:43 +0000
+  [  ]
+  * new release 1.0.3
+
+  [  ]
+  * fix deb name in raspbian build
+
+  [  ]
+  * fix deb name in ubuntu arm64 build
+
+ --  <runner@fv-az176-875.4wkcz0v45uietc2eynm1dqg11c.cx.internal.cloudapp.net>  Sat, 02 Jan 2021 21:25:14 +0000
 
 indi-celestron-cgx (0.2) focal; urgency=low
 
