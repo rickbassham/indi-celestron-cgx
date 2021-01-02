@@ -12,8 +12,8 @@ find_package(Nova REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(GSL REQUIRED)
 
-set(CCGX_VERSION_MAJOR 0)
-set(CCGX_VERSION_MINOR 2)
+set(CCGX_VERSION_MAJOR 1)
+set(CCGX_VERSION_MINOR 0)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_celestron_cgx.xml.cmake ${CMAKE_CURRENT_BINARY_DIR}/indi_celestron_cgx.xml )
