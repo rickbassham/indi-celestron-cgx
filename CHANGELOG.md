@@ -1,3 +1,23 @@
+# [1.1.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.3...v1.1.0) (2021-01-02)
+
+
+### Bug Fixes
+
+* fix parking to use stepper counts ([a6fa6ea](https://github.com/rickbassham/indi-celestron-cgx/commit/a6fa6ea1f9e565fdeb00b41464789bd4eea82fd1))
+* more code cleanup ([3c2b251](https://github.com/rickbassham/indi-celestron-cgx/commit/3c2b251460c8f6779b109bd563e9d4f6d894dcf1))
+* refactor mount commands into a separate class ([084d91c](https://github.com/rickbassham/indi-celestron-cgx/commit/084d91cc4c07b890c452672604f81b75e4b5db17))
+* update logging and handle parked mount better ([fe1e3e8](https://github.com/rickbassham/indi-celestron-cgx/commit/fe1e3e84695fcfb7b0b0c1e754cf15ac60e9b864))
+* use IDLog for logging instead of directly to stderr ([36077d8](https://github.com/rickbassham/indi-celestron-cgx/commit/36077d8b15c63522f4b4eed978a687ab2ecb89e3))
+
+
+### Features
+
+* add alignment subsystem to driver; once 2 sync points have been added ([cf5e07d](https://github.com/rickbassham/indi-celestron-cgx/commit/cf5e07dff71790fbeb371063b379b4b93747ace1))
+* add switch to force location update in alignment subsystem ([5fdba79](https://github.com/rickbassham/indi-celestron-cgx/commit/5fdba7973b9b98d7eaaa3dfae1cf83d7e61a20bf))
+* approach the final slew slowly ([218c633](https://github.com/rickbassham/indi-celestron-cgx/commit/218c6335612399d1f748a3474961ca8945255e99))
+* finish adding alignment subsystem to driver ([7c41ee4](https://github.com/rickbassham/indi-celestron-cgx/commit/7c41ee48347da6a1ec49a5f532c45a5678c37d0f))
+* improve close goto ([071c6e9](https://github.com/rickbassham/indi-celestron-cgx/commit/071c6e9e00e053f83c30720da405a7f6e41ea74b))
+
 ## [1.0.3](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.2...v1.0.3) (2021-01-02)
 
 

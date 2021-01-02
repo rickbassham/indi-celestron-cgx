@@ -1,4 +1,4 @@
-indi-celestron-cgx (1.0.3) UNRELEASED; urgency=medium
+indi-celestron-cgx (1.1.0) UNRELEASED; urgency=medium
 
   [ runner@fv-az128-843.thglmovbqukedp2komqfxyc2db.cx.internal.cloudapp.net ]
   * new release 1.0.2
@@ -18,7 +18,41 @@ indi-celestron-cgx (1.0.3) UNRELEASED; urgency=medium
   [  ]
   * fix deb name in ubuntu arm64 build
 
- --  <runner@fv-az176-875.4wkcz0v45uietc2eynm1dqg11c.cx.internal.cloudapp.net>  Sat, 02 Jan 2021 21:25:14 +0000
+  [  ]
+  * new release 1.1.0
+
+  [  ]
+  * fix parking to use stepper counts
+
+  [  ]
+  * more code cleanup
+
+  [  ]
+  * refactor mount commands into a separate class
+
+  [  ]
+  * update logging and handle parked mount better
+
+  [  ]
+  * use IDLog for logging instead of directly to stderr
+
+  [  ]
+  * add alignment subsystem to driver; once 2 sync points have been
+    added
+
+  [  ]
+  * add switch to force location update in alignment subsystem
+
+  [  ]
+  * approach the final slew slowly
+
+  [  ]
+  * finish adding alignment subsystem to driver
+
+  [  ]
+  * improve close goto
+
+ --  <runner@fv-az121-271.sgwjydgzdweudfknbljtmirxqc.cx.internal.cloudapp.net>  Sat, 02 Jan 2021 21:40:53 +0000
 
 indi-celestron-cgx (0.2) focal; urgency=low
 
