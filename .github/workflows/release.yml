@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: install utils
         run: |
-          apt-get install -y devscripts
+          sudo apt-get install -y devscripts
       - name: npm install
         run: |
           npm install semantic-release \
