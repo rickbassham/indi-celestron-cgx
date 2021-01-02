@@ -1,5 +1,7 @@
 FROM rickbassham/raspbian-build:latest
 
+RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
 RUN chroot /raspbian qemu-arm-static /bin/bash -c 'wget -O - https://www.astroberry.io/repo/key | apt-key add -'
 RUN chroot /raspbian qemu-arm-static /bin/bash -c 'echo "deb https://www.astroberry.io/repo/ buster main" > /etc/apt/sources.list.d/astroberry.list'
 RUN chroot /raspbian qemu-arm-static /bin/bash -c 'apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*'
