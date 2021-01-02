@@ -108,6 +108,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
-          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
+          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
+          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
           asset_content_type: application/octet-stream
