@@ -1,7 +1,8 @@
 name: build-raspbian
 
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build-raspbian:
@@ -25,10 +26,25 @@ jobs:
           tags: cgx-build-raspbian:latest
       - name: Build Package
         run: |
-          docker run --rm -v `pwd`:/raspbian/output cgx-build-raspbian /bin/bash -c 'cd build/deb-indi-celestron-cgx && fakeroot-tcp debian/rules binary && cp ../*.deb /output'
+          docker run --rm -v `pwd`:/raspbian/output cgx-build-raspbian /bin/bash -c 'cd build/deb-indi-celestron-cgx && fakeroot-tcp debian/rules binary && cp ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}_armhf.deb /output/indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_armhf.deb'
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
           name: debs-raspbian
           path: |
             *.deb
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-raspbian_armhf.deb
+          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-raspbian_armhf.deb
+          asset_content_type: application/octet-stream

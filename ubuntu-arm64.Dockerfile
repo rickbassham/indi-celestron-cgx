@@ -1,28 +1,18 @@
-ARG UBUNTU_VERSION=focal
-FROM balenalib/aarch64-ubuntu:${UBUNTU_VERSION}-run
+ARG UBUNTU_VERSION="focal"
+FROM rickbassham/ubuntu-raspberry-build:${UBUNTU_VERSION}
 
-RUN [ "cross-build-start" ]
+RUN chroot /raspberry qemu-aarch64-static /bin/bash -c 'DEBIAN_FRONTEND="noninteractive" add-apt-repository ppa:mutlaqja/ppa && rm -rf /var/lib/apt/lists/*'
+RUN chroot /raspberry qemu-aarch64-static /bin/bash -c 'apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y && rm -rf /var/lib/apt/lists/*'
 
-ARG DEBIAN_FRONTEND="noninteractive"
-ENV TZ=America/New_York
+RUN chroot /raspberry qemu-aarch64-static /bin/bash -c 'apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y libindi-dev libnova-dev libz-dev libgsl-dev && rm -rf /var/lib/apt/lists/*'
 
-RUN install_packages \
-    build-essential devscripts debhelper fakeroot cdbs software-properties-common cmake wget
+RUN mkdir -p /raspberry/src/indi-celestron-cgx
+WORKDIR /raspberry/src/indi-celestron-cgx
 
-RUN add-apt-repository ppa:mutlaqja/ppa
+COPY . /raspberry/src/indi-celestron-cgx
 
-RUN install_packages \
-    libindi-dev libnova-dev libz-dev libgsl-dev
+RUN mkdir -p /raspberry/build/deb-indi-celestron-cgx
+WORKDIR /raspberry/build/deb-indi-celestron-cgx
 
-RUN mkdir -p /src/indi-celestron-cgx
-WORKDIR /src/indi-celestron-cgx
-
-COPY . /src/indi-celestron-cgx
-
-RUN mkdir -p /build/deb-indi-celestron-cgx
-WORKDIR /build/deb-indi-celestron-cgx
-
-RUN cp -r /src/indi-celestron-cgx .
-RUN cp -r /src/indi-celestron-cgx/debian debian
-
-RUN [ "cross-build-end" ]
+RUN cp -r /raspberry/src/indi-celestron-cgx .
+RUN cp -r /raspberry/src/indi-celestron-cgx/debian debian

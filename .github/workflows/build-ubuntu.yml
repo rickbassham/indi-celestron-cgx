@@ -1,13 +1,14 @@
 name: build-ubuntu
 
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build-ubuntu-amd64:
     strategy:
       matrix:
-        os: ["groovy", "focal", "bionic", "xenial"]
+        os: ["groovy", "focal"]
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
@@ -19,6 +20,9 @@ jobs:
           install: true
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build the builder
@@ -32,45 +36,78 @@ jobs:
             UBUNTU_VERSION=${{ matrix.os }}
       - name: Build Package
         run: |
-          docker run --rm -v `pwd`:/output cgx-build-ubuntu-amd64:${{ matrix.os }} /bin/bash -c 'fakeroot-tcp debian/rules binary && cp ../*.deb /output'
+          docker run --rm -v `pwd`:/output cgx-build-ubuntu-amd64:${{ matrix.os }} /bin/bash -c 'fakeroot-tcp debian/rules binary && cp ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}_amd64.deb /output/indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb'
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
           name: debs-ubuntu-amd64-${{matrix.os}}
           path: |
             *.deb
-  # build-ubuntu-arm64:
-  #   strategy:
-  #     matrix:
-  #       os: ["focal", "bionic", "xenial"]
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v1
-  #     - name: Docker Setup Buildx
-  #       uses: docker/setup-buildx-action@v1.0.3
-  #       id: buildx
-  #       with:
-  #         install: true
-  #     - name: Available platforms
-  #       run: echo ${{ steps.buildx.outputs.platforms }}
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: Build the builder
-  #       uses: docker/build-push-action@v2
-  #       with:
-  #         context: .
-  #         file: ./ubuntu-arm64.Dockerfile
-  #         load: true
-  #         tags: cgx-build-ubuntu-arm64:${{ matrix.os }}
-  #         build-args: |
-  #           UBUNTU_VERSION=${{ matrix.os }}
-  #     - name: Build Package
-  #       run: |
-  #         docker run --rm -v `pwd`:/output cgx-build-ubuntu-arm64:${{ matrix.os }} /bin/bash -c 'cross-build-start && fakeroot-tcp debian/rules binary && cp ../*.deb /output && cross-build-end'
-  #     - name: Archive production artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: debs-ubuntu-arm64-${{matrix.os}}
-  #         path: |
-  #           *.deb
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
+          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
+          asset_content_type: application/octet-stream
+  build-ubuntu-arm64:
+    strategy:
+      matrix:
+        os: ["focal", "groovy"]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v1.0.3
+        id: buildx
+        with:
+          install: true
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build the builder
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ubuntu-arm64.Dockerfile
+          load: true
+          tags: cgx-build-ubuntu-arm64:${{ matrix.os }}
+          build-args: |
+            UBUNTU_VERSION=${{ matrix.os }}
+      - name: Build Package
+        run: |
+          docker run --rm -v `pwd`:/raspberry/output cgx-build-ubuntu-arm64:${{ matrix.os }} /bin/bash -c 'cd build/deb-indi-celestron-cgx && fakeroot-tcp debian/rules binary && cp ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}_arm64.deb /output/indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb'
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: debs-ubuntu-arm64-${{matrix.os}}
+          path: |
+            *.deb
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
+          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
+          asset_content_type: application/octet-stream
