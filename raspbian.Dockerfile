@@ -1,31 +1,18 @@
-FROM balenalib/raspberry-pi-debian:latest
+FROM rickbassham/raspbian-build:latest
 
-RUN [ "cross-build-start" ]
+RUN chroot /raspbian qemu-arm-static /bin/bash -c 'wget -O - https://www.astroberry.io/repo/key | apt-key add -'
+RUN chroot /raspbian qemu-arm-static /bin/bash -c 'echo "deb https://www.astroberry.io/repo/ buster main" > /etc/apt/sources.list.d/astroberry.list'
+RUN chroot /raspbian qemu-arm-static /bin/bash -c 'apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*'
 
-ARG DEBIAN_FRONTEND="noninteractive"
-ENV TZ=America/New_York
+RUN chroot /raspbian qemu-arm-static /bin/bash -c 'apt-get update && apt-get install -y libindi-dev libnova-dev libz-dev libgsl-dev && rm -rf /var/lib/apt/lists/*'
 
-RUN install_packages \
-    build-essential devscripts debhelper fakeroot cdbs software-properties-common cmake wget
+RUN mkdir -p /raspbian/src/indi-celestron-cgx
+WORKDIR /raspbian/src/indi-celestron-cgx
 
-#RUN wget -O - https://ppa.stellarmate.com/repos/apt/conf/sm.gpg.key | apt-key add -
-#RUN echo 'deb https://ppa.stellarmate.com/repos/apt/stable/ buster main' > /etc/apt/sources.list.d/stellarmate.list
+COPY . /raspbian/src/indi-celestron-cgx
 
-RUN wget -O - https://www.astroberry.io/repo/key | apt-key add -
-RUN echo 'deb https://www.astroberry.io/repo/ buster main' > /etc/apt/sources.list.d/astroberry.list
+RUN mkdir -p /raspbian/build/deb-indi-celestron-cgx
+WORKDIR /raspbian/build/deb-indi-celestron-cgx
 
-RUN install_packages \
-    libindi-dev libnova-dev libz-dev libgsl-dev
-
-RUN mkdir -p /src/indi-celestron-cgx
-WORKDIR /src/indi-celestron-cgx
-
-COPY . /src/indi-celestron-cgx
-
-RUN mkdir -p /build/deb-indi-celestron-cgx
-WORKDIR /build/deb-indi-celestron-cgx
-
-RUN cp -r /src/indi-celestron-cgx .
-RUN cp -r /src/indi-celestron-cgx/debian debian
-
-RUN [ "cross-build-end" ]
+RUN cp -r /raspbian/src/indi-celestron-cgx .
+RUN cp -r /raspbian/src/indi-celestron-cgx/debian debian
