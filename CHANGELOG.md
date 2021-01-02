@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.1...v1.0.2) (2021-01-02)
+
+
+### Bug Fixes
+
+* add devscripts to release ([ccbceff](https://github.com/rickbassham/indi-celestron-cgx/commit/ccbcefff6d75fd8431c37c801a897b4a0318737a))
+* sudo ([49b9d6e](https://github.com/rickbassham/indi-celestron-cgx/commit/49b9d6ed23d8435f37eb38838e80b19dee50d7df))
+
 ## [1.0.1](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.0...v1.0.1) (2021-01-02)
 
 

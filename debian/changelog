@@ -1,3 +1,16 @@
+indi-celestron-cgx (1.0.2) UNRELEASED; urgency=medium
+
+  [ runner@fv-az128-843.thglmovbqukedp2komqfxyc2db.cx.internal.cloudapp.net ]
+  * new release 1.0.2
+
+  [  ]
+  * add devscripts to release
+
+  [  ]
+  * sudo
+
+ --  <runner@fv-az128-843.thglmovbqukedp2komqfxyc2db.cx.internal.cloudapp.net>  Sat, 02 Jan 2021 21:15:43 +0000
+
 indi-celestron-cgx (0.2) focal; urgency=low
 
   * Add autoguiding support
