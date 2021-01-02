@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: install utils
+        run: |
+          apt-get install -y devscripts
       - name: npm install
         run: |
           npm install semantic-release \
