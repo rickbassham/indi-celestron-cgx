@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.0...v1.0.1) (2021-01-02)
+
+
+### Bug Fixes
+
+* include get_version in raspbian build ([350cba3](https://github.com/rickbassham/indi-celestron-cgx/commit/350cba3d779ad0034d2e84a60941f89a4103c221))
+
 # 1.0.0 (2021-01-02)
 
 
