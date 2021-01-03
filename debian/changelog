@@ -1,3 +1,10 @@
+indi-celestron-cgx (1.2.2) focal; urgency=medium
+
+  * new release 1.2.2
+  * fix generation of debian changelog
+
+ -- Rick Bassham <brodrick.bassham@gmail.com>  Sun, 03 Jan 2021 14:00:25 +0000
+
 indi-celestron-cgx (0.2) focal; urgency=low
 
   * Add autoguiding support

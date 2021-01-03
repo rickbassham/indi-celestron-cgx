@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.1...v1.2.2) (2021-01-03)
+
+
+### Bug Fixes
+
+* fix generation of debian changelog ([b2d1efd](https://github.com/rickbassham/indi-celestron-cgx/commit/b2d1efdb8fd136b62e749a179d5c36352cac2c36))
+
 ## [1.2.1](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.0...v1.2.1) (2021-01-03)
 
 
