@@ -14,7 +14,7 @@ echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/focal focal
 ## Ubuntu Groovy (amd64/arm64)
 
 ```bash
-echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/focal focal main" | sudo tee /etc/apt/sources.list.d/indi-celestron-cgx.list
+echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/groovy groovy main" | sudo tee /etc/apt/sources.list.d/indi-celestron-cgx.list
 ```
 
 ## Rasbian Buster
