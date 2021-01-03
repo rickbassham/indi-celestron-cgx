@@ -22,7 +22,7 @@ echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/groovy groo
     sudo tee /etc/apt/sources.list.d/indi-celestron-cgx.list
 ```
 
-### Rasbian Buster
+### Raspbian Buster
 
 ```bash
 echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/raspbian buster main" | \
