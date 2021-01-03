@@ -1,16 +1,16 @@
 Package: indi-celestron-cgx
-Version: 1.1.0
+Version: 1.2.1
 Architecture: arm64
 Maintainer: Rick Bassham <brodrick.bassham@gmail.com>
 Installed-Size: 99
 Depends: libc6 (>= 2.17), libgcc-s1 (>= 3.0), libindi1, libnova-0.16-0, libstdc++6 (>= 5.2)
 Priority: extra
 Section: science
-Filename: pool/main/i/indi-celestron-cgx/indi-celestron-cgx_1.1.0_arm64.deb
-Size: 25968
-SHA256: fb8edf87a059642e236bf0a94ca22d769ed77f4a5b68f7a8c079a0988e473db7
-SHA1: e6a42ef18ed0c7eff33eadc5defdff7cec65d4a8
-MD5sum: 35635e27924b45350f7cd1605b866866
+Filename: pool/main/i/indi-celestron-cgx/indi-celestron-cgx_1.2.1_arm64.deb
+Size: 25952
+SHA256: 7637acd1748ccd69a895e2010d978fe42a0733cdc2ceff64b3e952653c02a0ce
+SHA1: 8c717ee2df829c9b6b0db01cd78cdc255ebdd750
+MD5sum: 7e919838064f69231bfeba3ddfa56a25
 Description: INDI driver for Celestron CGX mounts using direct USB connection.
  .
  This is a driver for Celestron CGX mounts using the direct USB connection without a hand controller.
