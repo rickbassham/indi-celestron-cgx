@@ -58,6 +58,24 @@ jobs:
           asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
           asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
           asset_content_type: application/octet-stream
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: repo
+          path: repo
+      - name: Add to Repo
+        run: |
+          sudo apt-get install reprepro
+          cd repo
+          echo "$REPO_PRIVATE_KEY" > private.key
+          gpg --import private.key
+          reprepro --basedir repos/apt/${{ matrix.os }}/ includedeb ${{ matrix.os }} ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
+          git add repos
+          git commit -m "indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb"
+          git push
+        env:
+          REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
+
   build-ubuntu-arm64:
     strategy:
       matrix:
@@ -111,3 +129,20 @@ jobs:
           asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
           asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
           asset_content_type: application/octet-stream
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: repo
+          path: repo
+      - name: Add to Repo
+        run: |
+          sudo apt-get install reprepro
+          cd repo
+          echo "$REPO_PRIVATE_KEY" > private.key
+          gpg --import private.key
+          reprepro --basedir repos/apt/${{ matrix.os }}/ includedeb ${{ matrix.os }} ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
+          git add repos
+          git commit -m "indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb"
+          git push
+        env:
+          REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
