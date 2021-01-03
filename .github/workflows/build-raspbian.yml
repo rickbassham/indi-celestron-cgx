@@ -63,8 +63,11 @@ jobs:
           echo "$REPO_PRIVATE_KEY" > private.key
           gpg --import private.key
           reprepro --basedir repos/apt/raspbian/ includedeb buster ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-raspbian_armhf.deb
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add repos
           git commit -m "indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-raspbian_armhf.deb"
+          git pull --rebase
           git push
         env:
           REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
