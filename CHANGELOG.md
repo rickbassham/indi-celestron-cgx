@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.0...v1.2.1) (2021-01-03)
+
+
+### Bug Fixes
+
+* git config before committing ([f21c940](https://github.com/rickbassham/indi-celestron-cgx/commit/f21c940eb1447dc8684e735422e40427ad2771fe))
+
 # [1.2.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.1.0...v1.2.0) (2021-01-03)
 
 
