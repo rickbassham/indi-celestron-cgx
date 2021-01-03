@@ -1,0 +1,45 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: indi-celestron-cgx
+Label: indi-celestron-cgx
+Codename: focal
+Date: Sat, 02 Jan 2021 23:57:57 UTC
+Architectures: amd64 arm64
+Components: main
+Description: Apt repository for indi-celestron-cgx
+MD5Sum:
+ 68e718080c351d581360c7af555912db 833 main/binary-amd64/Packages
+ ae48eebc8ed9a0e210160b71c8520b71 538 main/binary-amd64/Packages.gz
+ 1debe5139118d4d088d9e9a517f96e19 140 main/binary-amd64/Release
+ 2403150067077c1ea64959c8446130b6 833 main/binary-arm64/Packages
+ ce1001dcb00f57c71415944bb98897dc 539 main/binary-arm64/Packages.gz
+ 90b73aa63af33b9d98ef90b41a6a50a9 140 main/binary-arm64/Release
+SHA1:
+ 7f46ae8c7e171d5e22181f189812ceeb59c5ef36 833 main/binary-amd64/Packages
+ cf42601a44fbb1505ba5217db6b19b47df53a0e1 538 main/binary-amd64/Packages.gz
+ 91e2321d40f67e7fb58c1ef8df54d3c99965076c 140 main/binary-amd64/Release
+ 6138e35eea7c1f82ddf3200f94dbabec99811513 833 main/binary-arm64/Packages
+ e2d633a22278e4ba1813544c3b3fa3f537a83512 539 main/binary-arm64/Packages.gz
+ b1f99ed177c3a9920fa288ad550e6a7e6edd5b53 140 main/binary-arm64/Release
+SHA256:
+ 2ac43269bf8ccc6d2d250dce77ec20a6326cbbed49990fe1904ccf26cfaecb1a 833 main/binary-amd64/Packages
+ 0f4000a581b32efa1921815b23db49141e6eb5429271e144d4b2a6e439f1b309 538 main/binary-amd64/Packages.gz
+ f37b7df9107d6a79dc9aac3ed39a0ac38265a689996606e43b447c48e416a38b 140 main/binary-amd64/Release
+ 472cf9d005fc1631d2d59cbcecdc422f66c15099ae4a1551b4e31678eefeeab2 833 main/binary-arm64/Packages
+ 15becdfe15e3f60efa780bc5cb6d790a9141f476d88e32a18acff1bea6ac8b20 539 main/binary-arm64/Packages.gz
+ aa9b905c2a83e118d90cc1cf844ddd2057b3fa055b152dba0b9cff05ee9a2ae4 140 main/binary-arm64/Release
+-----BEGIN PGP SIGNATURE-----
+
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/xCIUACgkQ6e6N5WOf
+yWXIkQv9GSd2g0p1BYdU9oXp7N/Z5Qe/QFlxQ1hnSzD2/SdP5iCdRE3IW09eQnmz
+Ut77VM5B12GK5zxcjgOaihP++nJtkdAn2LSudW3C/aA9Hu0cyTBgcmBZkpAWKxre
+HiD5PQs9H9pLoHzLuNCnls7blI9jl62Hv7KcaN6tZ1G/eRp4oypuZ1WnLscNtZME
+2lWLRnDUaBrvMr0GQ8GVrY+VoViTByYOBkYiKRZa2Z6yDyBXpKdb1J97oyf4TTOa
+HsUexhc2GmTc7rddcUj5ZIsPpLgJ4n4ktsvN+a+R9+NzfSw8LWKTlv8NU+SOEa/+
+se3RF7LrPjFJq/GzdvY0ybpz04boEXLCR84FGRFyyfO8LjmsOAVQggnOPf5vLi6I
+5dv+3cfXt91D9AZx9utANGVwQ1vjjF89omXA+uj+w8MJ93FN6oQPFjs/rImXBlc0
+61iPhAa+0sd5AhR1C98xRaUV1MsoGBpDGhJxFKRigO4MMv86VlnNm9h2arrXl4+w
+CkavL/eD
+=1qb2
+-----END PGP SIGNATURE-----

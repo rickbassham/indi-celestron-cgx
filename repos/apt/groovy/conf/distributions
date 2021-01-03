@@ -1,0 +1,7 @@
+Origin: indi-celestron-cgx
+Label: indi-celestron-cgx
+Codename: groovy
+Architectures: amd64 arm64
+Components: main
+Description: Apt repository for indi-celestron-cgx
+SignWith: 639FC965

@@ -1,0 +1,5 @@
+Component: main
+Origin: indi-celestron-cgx
+Label: indi-celestron-cgx
+Architecture: amd64
+Description: Apt repository for indi-celestron-cgx
