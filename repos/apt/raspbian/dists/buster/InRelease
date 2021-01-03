@@ -1,0 +1,36 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: indi-celestron-cgx
+Label: indi-celestron-cgx
+Codename: buster
+Date: Sun, 03 Jan 2021 00:11:28 UTC
+Architectures: armhf
+Components: main
+Description: Apt repository for indi-celestron-cgx
+MD5Sum:
+ 44f65cef53e7c46738337f4e2f6fbd48 873 main/binary-armhf/Packages
+ 70c34634f610d58dac93ac4e2ac36882 550 main/binary-armhf/Packages.gz
+ 2eb824eea30d67b6b2975155b75eb088 140 main/binary-armhf/Release
+SHA1:
+ b92d19a7c48f86464e8008a5f514a641030e517e 873 main/binary-armhf/Packages
+ 03cf84e5654dbd1f0e8b28565bc4530563304134 550 main/binary-armhf/Packages.gz
+ b50b3f2b21f8533376aa16863c978f152e4b50a4 140 main/binary-armhf/Release
+SHA256:
+ 2810e7ef0014d6137300d4e53bbc37b1f7dbd3d7b9ece483db851a217aadba9a 873 main/binary-armhf/Packages
+ a1fd5443d47b31e53593f541a81b3c02b327962bbb4afd1b0e755be851c5236c 550 main/binary-armhf/Packages.gz
+ 2e6071c47d8d376c9c1870aa836978b3ffc45d723a39681a0151657bcd57e450 140 main/binary-armhf/Release
+-----BEGIN PGP SIGNATURE-----
+
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/xC7AACgkQ6e6N5WOf
+yWVIGAwAlY+daEiV8pcGgAD+qlOt6gGkhaIx3fPtf0GU9D3ej/BLlWJFW8XQPvS7
+aQt/gmhIYV4sLclLjOCP7x9DbYxGYZvvurWJjgU+bALBFMMCqyCizF5v7tx0iPSD
+iA4h51eic1KMf8jeeKPRLLS0e8g1euLCcEkj6V3KIAkM5M53D+Xur2KfYsste4cj
+2zDZu1q2JThiv4e0GO1ERkxIgVYCDwzyI01mD2Y18A20p6QWAdmFgEpZgNsfQx7V
+n0QI1lR61pCMItvt+M8UYr3cfz+VLKw5i6d2vpjDxRQxf7p+t4VJtJZavXqVrNPX
+Hz9JxLiM9MBuA7BH4qJ6is9WZp+tYZovP3xDzYWAIFM9NLqEhzm6T+Gf9oLf9jPA
+fvjwJW50S13lNN2J4xnJpbiA/bbh23dbiiIj7brAvDGLfFB6m5sLuyx7HaLfguai
+NhNdAzYP4jWeF6Ry4oKdH84pAVDsu13pkyvms1BGB+U4KjDlkDqddayeWuSszTUM
+coVPIhcd
+=aRXw
+-----END PGP SIGNATURE-----

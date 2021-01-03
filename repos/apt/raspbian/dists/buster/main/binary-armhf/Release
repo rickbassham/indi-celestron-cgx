@@ -1,0 +1,5 @@
+Component: main
+Origin: indi-celestron-cgx
+Label: indi-celestron-cgx
+Architecture: armhf
+Description: Apt repository for indi-celestron-cgx
