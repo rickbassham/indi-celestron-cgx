@@ -1,27 +1,27 @@
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: groovy
-Date: Sat, 02 Jan 2021 23:56:57 UTC
+Date: Sun, 03 Jan 2021 02:01:22 UTC
 Architectures: amd64 arm64
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- 1438d575a98b9cfc4cd2bdb1e8ec5854 833 main/binary-amd64/Packages
- 4e0bac1ad2e25d76dbd28766baee3e28 538 main/binary-amd64/Packages.gz
+ 01dacee9d082ae732ed3c90d73d17245 833 main/binary-amd64/Packages
+ 2d933227351a6dd6d07ec03dc6fca5ab 537 main/binary-amd64/Packages.gz
  1debe5139118d4d088d9e9a517f96e19 140 main/binary-amd64/Release
  efbf88eec9ec41509665714230bb3143 832 main/binary-arm64/Packages
  a9dc4823cc027869587f0825466e1645 534 main/binary-arm64/Packages.gz
  90b73aa63af33b9d98ef90b41a6a50a9 140 main/binary-arm64/Release
 SHA1:
- b6e91f5fb2d37ee0b42282d75655218a36e9961d 833 main/binary-amd64/Packages
- efa0498aef1b16ebcfe4ec1073b041234c699a77 538 main/binary-amd64/Packages.gz
+ 00eeb253b5e878fdf0c1740c148b63fb40a1e3bf 833 main/binary-amd64/Packages
+ fd80e0bda33fc4e9833305bf901e3c9471c6872f 537 main/binary-amd64/Packages.gz
  91e2321d40f67e7fb58c1ef8df54d3c99965076c 140 main/binary-amd64/Release
  3c7d5a68644b84765273b50c2ed106b41f5cc340 832 main/binary-arm64/Packages
  d69355db5c140954fe34b9b6cc09105f60f7a441 534 main/binary-arm64/Packages.gz
  b1f99ed177c3a9920fa288ad550e6a7e6edd5b53 140 main/binary-arm64/Release
 SHA256:
- b9c80b3e9b959a6cf0d26c484d3a8ecd4b1f7c357f73b855108d6aa20d784cd3 833 main/binary-amd64/Packages
- 34b26a4d3affd22e1d1beebe9641e8a467f4ecffa58be88d5de9a933517fbb91 538 main/binary-amd64/Packages.gz
+ 43a8f0a4fd48d209e01ec5c32471d0235ce45e06592e9e4a5f31809e19b5face 833 main/binary-amd64/Packages
+ 8ea78e38c9f32f8b1cc0a97756f8309c1868aa27f81d4e784a17d15696820db0 537 main/binary-amd64/Packages.gz
  f37b7df9107d6a79dc9aac3ed39a0ac38265a689996606e43b447c48e416a38b 140 main/binary-amd64/Release
  383877e664e2b7cb5535313a9a94965b16922f0f97d93d813d89dcf763507cef 832 main/binary-arm64/Packages
  6f2e274b8479319488b4933456eb1791e196d8a7eec22f22a69044d68a366526 534 main/binary-arm64/Packages.gz
