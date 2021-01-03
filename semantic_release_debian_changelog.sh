@@ -1,10 +1,13 @@
 #!/bin/bash
 
-dch --newversion $1 "new release $1"
+export DEBFULLNAME="Rick Bassham"
+export DEBEMAIL="brodrick.bassham@gmail.com"
+
+dch --newversion $1 --empty --distribution focal "new release $1"
 
 while IFS= read -r line; do
     if [[ $line == "*"* ]]; then
-        dch -a `echo "$line" | sed 's/* //' | sed 's/([^)]*)//' | sed 's/ )//'`
+        dch -a --nomultimaint `echo "$line" | sed 's/* //' | sed 's/([^)]*)//' | sed 's/ )//'`
     fi
 done <<< "$2"
 
