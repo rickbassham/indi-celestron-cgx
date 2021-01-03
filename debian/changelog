@@ -1,4 +1,4 @@
-indi-celestron-cgx (1.1.0) UNRELEASED; urgency=medium
+indi-celestron-cgx (1.2.0) UNRELEASED; urgency=medium
 
   [ runner@fv-az128-843.thglmovbqukedp2komqfxyc2db.cx.internal.cloudapp.net ]
   * new release 1.0.2
@@ -52,7 +52,13 @@ indi-celestron-cgx (1.1.0) UNRELEASED; urgency=medium
   [  ]
   * improve close goto
 
- --  <runner@fv-az121-271.sgwjydgzdweudfknbljtmirxqc.cx.internal.cloudapp.net>  Sat, 02 Jan 2021 21:40:53 +0000
+  [  ]
+  * new release 1.2.0
+
+  [  ]
+  * auto add debs to repo
+
+ --  <runner@fv-az121-271.zbqy5jkg5nkezgrufkvteq4gvh.cx.internal.cloudapp.net>  Sun, 03 Jan 2021 01:45:43 +0000
 
 indi-celestron-cgx (0.2) focal; urgency=low
 

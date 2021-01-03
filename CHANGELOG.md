@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.1.0...v1.2.0) (2021-01-03)
+
+
+### Features
+
+* auto add debs to repo ([0912598](https://github.com/rickbassham/indi-celestron-cgx/commit/0912598a4c3a1a26c1d5652832dadb6f4c8cfc0f))
+
 # [1.1.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.0.3...v1.1.0) (2021-01-02)
 
 
