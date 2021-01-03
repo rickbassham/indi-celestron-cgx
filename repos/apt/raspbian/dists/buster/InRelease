@@ -4,33 +4,33 @@ Hash: SHA512
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: buster
-Date: Sun, 03 Jan 2021 02:06:41 UTC
+Date: Sun, 03 Jan 2021 14:07:43 UTC
 Architectures: armhf
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- b42c6bd8d09802af59e55c1e418a888f 873 main/binary-armhf/Packages
- 8679d3cce946078ae87cba04a9570e05 550 main/binary-armhf/Packages.gz
+ 5ee89c9ea7d57fc1f9eba72eee09ee8e 873 main/binary-armhf/Packages
+ e36058fdd81cb3d04facb915647edacb 548 main/binary-armhf/Packages.gz
  2eb824eea30d67b6b2975155b75eb088 140 main/binary-armhf/Release
 SHA1:
- 6efd3ce655570c99c89737a3ede123227133b10f 873 main/binary-armhf/Packages
- 46d370d9aa16921b0e7da51c9406e417151bd808 550 main/binary-armhf/Packages.gz
+ 79b2024d0d88e2fb570705c4c6fe5396c4a18fc1 873 main/binary-armhf/Packages
+ 76e9e25f54bf3e76f2b125d891e438188e2d9a92 548 main/binary-armhf/Packages.gz
  b50b3f2b21f8533376aa16863c978f152e4b50a4 140 main/binary-armhf/Release
 SHA256:
- 726ae036e6dcc1f37a8f540c5499a32c906cea7dcaeac1573747c91b03072c96 873 main/binary-armhf/Packages
- a102980365e9624004098c348a02b15ada48607a8ac09665321b3a8967ba1fae 550 main/binary-armhf/Packages.gz
+ 292ac2bd65e0a8a18d7b33e83261c241844f90c5d369f6e0152096d619e6847f 873 main/binary-armhf/Packages
+ de71bdb5daa2b4903bc0da16cbed0b3b1bf097d7423844384b22decfe10f65a1 548 main/binary-armhf/Packages.gz
  2e6071c47d8d376c9c1870aa836978b3ffc45d723a39681a0151657bcd57e450 140 main/binary-armhf/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/xJrEACgkQ6e6N5WOf
-yWWmSQv/Y/ZZM4DnPd85mSA/OdXvJk6GHm4wA2nGEdC0Zw/k2gORzARH434tmyOf
-N+tDuk5hm6WXbHDHQkCCQxDEax7OylYhd6Q/h6Xs09eGAbISwosTEkprvVfdPbD6
-7LHTLW6EDE3NQI7vgc2IQAbJkjUS9vjqOa68lOQnTSF6Z0Qbq3f4YV7sbOQQe6hD
-s9ONSIwxgWqlTFiwPFM3dfzTy4q1bK4d0fBoZhw1nl06D1sNTjpF8U0qg0zM7eg7
-jQhK1sZ14Meiao+QHg9Ng5OE4Xnfh0Ip+1L2kxev+XkO0tsnEcioAy2EWlN+dvUl
-8qHtUXleYkER8DedZYmtXOnwqMHydhja+LF03Ge/teC9Ud6zjWdN+VLFWBEcFBTy
-1c84voRKaVrpIAbZHAU0vgT0sqR6EDrybJAT6V/AyWqymXQMNF6tVTDEzG/wluCH
-LbdtNT6CUAS78aYCU5aGfuYeCJV+7Rihkx9GHou9RPLEbO6MQnfK3dJY4jQDrP/6
-EkWqU3Ci
-=kPAl
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/xz68ACgkQ6e6N5WOf
+yWW8Dwv+IPYgEZcb5vp5WuGrxXf1GHegMgTDYwEaTTsOV/PctetpdLNfqdfPfbIC
+bTTnat+iQHAEsH3OcWI1CLGgCQhlcbNScT1IybSWmRCm9Usp6e0U/V2ZUXlCOaU0
+aYzW1FnCexnF5apy/A32OApWb64DDQsukPjTsp3MnfXaWEo3F1uuUPLthmnN5PNm
+Pg5XOYQkcLWOAKi8AeHyYWq2ATuh53lg5rFMBLZpYrsuKpnSWaZqSySt+G2BbLxS
+aELPHsfPFwBGiYie17MtYiCd2CFqeidjFoLFuiebEnen/0v1Q/4pejuU0kBEkwq+
+FAH1pUogLOfyWOYScTeZXfDWy/rLxNjnWtANiLyv5KHV/MO9ZVlKoBC+gxxIYXfv
+gs5wbX74bOCoBTEpJwxMUNxC4nYuVtWlVONrnkrC4fCciQekzYeJaL7DGX5CiDBA
+QoDyep4G0FZf2jeHDVvyaAfVPcuwj2Gk26K+XxNmB8XWxvS/yd/izrjD03bv02YZ
+7VC1gAVb
+=ITo1
 -----END PGP SIGNATURE-----
