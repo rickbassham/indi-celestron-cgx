@@ -1,5 +1,33 @@
-Celestron CGX USB driver
+# Celestron CGX USB driver
 -------------------------------------
+
+```bash
+wget -qO - https://rickbassham.github.io/indi-celestron-cgx/public.key | sudo apt-key add -
+```
+
+## Ubuntu Focal (amd64/arm64)
+
+```bash
+echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/focal focal main" | sudo tee /etc/apt/sources.list.d/indi-celestron-cgx.list
+```
+
+## Ubuntu Groovy (amd64/arm64)
+
+```bash
+echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/focal focal main" | sudo tee /etc/apt/sources.list.d/indi-celestron-cgx.list
+```
+
+## Rasbian Buster
+
+```bash
+echo "deb https://rickbassham.github.io/indi-celestron-cgx/repos/apt/raspbian buster main" | sudo tee /etc/apt/sources.list.d/indi-celestron-cgx.list
+```
+
+## All
+
+```bash
+sudo apt update && sudo apt install indi-celestron-cgx
+```
 
 Compiling on any linux system
 =============================
