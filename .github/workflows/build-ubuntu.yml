@@ -120,6 +120,11 @@ jobs:
           name: debs-raspbian
           path: |
             *.deb
+
+  publish-release:
+    runs-on: ubuntu-20.04
+    needs: [build-ubuntu-arm64, build-ubuntu-amd64, build-raspbian]
+    steps:
       - uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -132,13 +137,12 @@ jobs:
 
   update-repo:
     runs-on: ubuntu-20.04
-    needs: [build-ubuntu-arm64, build-ubuntu-amd64, build-raspbian]
+    needs: [publish-release]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: repo
-          path: repo
       - uses: actions/download-artifact@v2
       - name: Gather assets
         run: |
@@ -155,7 +159,6 @@ jobs:
           REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
         run: |
           sudo apt-get install reprepro
-          cd repo
           echo "$REPO_PRIVATE_KEY" > private.key
           gpg --import private.key
 
