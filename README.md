@@ -61,9 +61,10 @@ cd ~/Projects
 git clone https://github.com/rickbassham/indi-celestron-cgx.git
 mkdir -p ~/Projects/build/indi-celestron-cgx
 cd ~/Projects/build/indi-celestron-cgx
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug ~/Projects/indi-celestron-cgx
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ~/Projects/indi-celestron-cgx
 make
 ```
+
 You can run `sudo make install` optionally at the end if you like to have the driver
 properly installed.
 

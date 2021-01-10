@@ -79,7 +79,7 @@ CelestronCGX::CelestronCGX() : m_alignment(STEPS_PER_REVOLUTION)
 
 const char *CelestronCGX::getDefaultName()
 {
-    return "Celestron CGX";
+    return "Celestron CGX USB";
 }
 
 bool CelestronCGX::initProperties()

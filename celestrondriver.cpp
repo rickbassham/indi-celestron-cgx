@@ -21,7 +21,7 @@
 #include <libindi/indilogger.h>
 #include <termios.h>
 
-static char device_str[MAXINDIDEVICE] = "Celestron CGX";
+static char device_str[MAXINDIDEVICE] = "Celestron CGX USB";
 
 const char *CelestronDriver::getDeviceName()
 {
