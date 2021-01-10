@@ -1,0 +1,42 @@
+name: Github Release Draft
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-draft-release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Get Notes
+        id: get_notes
+        run: |
+          NOTES=$(git show -1 --no-notes --no-patch | tail +9 | sed -e 's/^[[:space:]]*//')
+
+          echo "${NOTES}"
+
+          NOTES="${NOTES//'%'/'%25'}"
+          NOTES="${NOTES//$'\n'/'%0A'}"
+          NOTES="${NOTES//$'\r'/'%0D'}"
+          echo ::set-output name=NOTES::"${NOTES}"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: indi-celestron-cgx ${{ github.ref }}
+          draft: true
+          body: ${{ steps.get_notes.outputs.NOTES }}
+      - name: Dispatch build-trigger
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          event-type: build-trigger
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "release": { "id": "${{ steps.create_release.outputs.id }}", "html_url": "${{ steps.create_release.outputs.html_url }}", "upload_url": "${{ steps.create_release.outputs.upload_url }}" }}'

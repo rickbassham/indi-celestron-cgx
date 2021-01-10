@@ -1,8 +1,8 @@
-name: build-ubuntu
+name: build-all
 
 on:
-  release:
-    types: [published]
+  repository_dispatch:
+    types: [build-trigger]
 
 jobs:
   build-ubuntu-amd64:
@@ -20,9 +20,11 @@ jobs:
           install: true
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-      - name: Get the version
+      - name: Get tag version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+        run: |
+          GITHUB_REF=${{ github.event.client_payload.ref }}
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build the builder
@@ -43,41 +45,6 @@ jobs:
           name: debs-ubuntu-amd64-${{matrix.os}}
           path: |
             *.deb
-      - name: Get release
-        id: get_release
-        uses: bruceadams/get-release@v1.2.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
-          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
-          asset_content_type: application/octet-stream
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: repo
-          path: repo
-      - name: Add to Repo
-        run: |
-          sudo apt-get install reprepro
-          cd repo
-          echo "$REPO_PRIVATE_KEY" > private.key
-          gpg --import private.key
-          reprepro --basedir repos/apt/${{ matrix.os }}/ includedeb ${{ matrix.os }} ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add repos
-          git commit -m "indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_amd64.deb"
-          git pull --rebase
-          git push
-        env:
-          REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
 
   build-ubuntu-arm64:
     strategy:
@@ -94,9 +61,11 @@ jobs:
           install: true
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-      - name: Get the version
+      - name: Get tag version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+        run: |
+          GITHUB_REF=${{ github.event.client_payload.ref }}
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build the builder
@@ -117,38 +86,94 @@ jobs:
           name: debs-ubuntu-arm64-${{matrix.os}}
           path: |
             *.deb
-      - name: Get release
-        id: get_release
-        uses: bruceadams/get-release@v1.2.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+
+  build-raspbian:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v1.0.3
+        id: buildx
+        with:
+          install: true
+      - name: Get tag version
+        id: get_version
+        run: |
+          GITHUB_REF=${{ github.event.client_payload.ref }}
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build the builder
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./raspbian.Dockerfile
+          load: true
+          tags: cgx-build-raspbian:latest
+      - name: Build Package
+        run: |
+          docker run --rm -v `pwd`:/raspbian/output cgx-build-raspbian /bin/bash -c 'cd build/deb-indi-celestron-cgx && fakeroot-tcp debian/rules binary && cp ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}_armhf.deb /output/indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-raspbian_armhf.deb'
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: debs-raspbian
+          path: |
+            *.deb
+      - uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
-          asset_name: indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
-          asset_content_type: application/octet-stream
+          release_id: ${{ github.event.client_payload.release.id }}
+      - name: Delete drafts
+        uses: hugo19941994/delete-draft-releases@v0.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  update-repo:
+    runs-on: ubuntu-20.04
+    needs: [build-ubuntu-arm64, build-ubuntu-amd64, build-raspbian]
+    steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: repo
           path: repo
+      - uses: actions/download-artifact@v2
+      - name: Gather assets
+        run: |
+          mv debs*/*.deb .
+      - name: Upload Multiple Release Assets
+        uses: NBTX/upload-release-assets@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ github.event.client_payload.release.upload_url }}
+          targets: "*.deb"
       - name: Add to Repo
+        env:
+          REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
         run: |
           sudo apt-get install reprepro
           cd repo
           echo "$REPO_PRIVATE_KEY" > private.key
           gpg --import private.key
-          reprepro --basedir repos/apt/${{ matrix.os }}/ includedeb ${{ matrix.os }} ../indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb
+
+          ASSETS=$(ls *.deb | sed -E 's/^(indi-celestron-cgx_([[:digit:]\.*?]+)-([^_]+)_([^\.]+).deb)$/\1\t\2\t\3\t\4/')
+
+          echo "${ASSETS}" |
+              while IFS=$'\t' read -r file version dist arch; do
+                if [ "$dist" = "raspbian" ]; then
+                    distver=buster
+                else
+                    distver=$dist
+                fi
+                reprepro --basedir repos/apt/${dist}/ includedeb ${distver} ${file}
+              done
+
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add repos
-          git commit -m "indi-celestron-cgx_${{ steps.get_version.outputs.VERSION }}-${{ matrix.os }}_arm64.deb"
+          git commit -m "indi-celestron-cgx ${{ steps.get_version.outputs.VERSION }}"
           git pull --rebase
           git push
-        env:
-          REPO_PRIVATE_KEY: ${{secrets.REPO_PRIVATE_KEY}}
