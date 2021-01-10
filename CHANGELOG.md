@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.2...v1.2.3) (2021-01-10)
+
+
+### Bug Fixes
+
+* update naming of device ([0898eae](https://github.com/rickbassham/indi-celestron-cgx/commit/0898eae6a39c5800faac1c896752b563fd8a5aef))
+
 ## [1.2.2](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.1...v1.2.2) (2021-01-03)
 
 
