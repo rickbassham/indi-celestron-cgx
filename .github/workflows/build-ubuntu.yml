@@ -162,8 +162,6 @@ jobs:
           echo "$REPO_PRIVATE_KEY" > private.key
           gpg --import private.key
 
-          ls -R
-
           ASSETS=$(ls *.deb | sed -E 's/^(indi-celestron-cgx_([[:digit:]\.*?]+)-([^_]+)_([^\.]+).deb)$/\1\t\2\t\3\t\4/')
 
           echo "${ASSETS}" |
