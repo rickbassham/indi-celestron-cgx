@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.3...v1.2.4) (2021-01-10)
+
+
+### Bug Fixes
+
+* build system ([bcbefb5](https://github.com/rickbassham/indi-celestron-cgx/commit/bcbefb52d7756ff7e638d29a4d140f4da4a83219))
+
 ## [1.2.3](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.2...v1.2.3) (2021-01-10)
 
 
