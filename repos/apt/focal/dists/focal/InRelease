@@ -4,42 +4,42 @@ Hash: SHA512
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: focal
-Date: Sun, 03 Jan 2021 14:08:26 UTC
+Date: Sun, 10 Jan 2021 00:13:50 UTC
 Architectures: amd64 arm64
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- c953933303a0c8f8f3de740414698458 833 main/binary-amd64/Packages
- c62ba42fd913a65bd604a1eeca335578 537 main/binary-amd64/Packages.gz
+ bf762973703c3f6d014f0042e4bf6cef 833 main/binary-amd64/Packages
+ e74d1b9aa24b9d02bc6bf07eaec3c2f1 537 main/binary-amd64/Packages.gz
  1debe5139118d4d088d9e9a517f96e19 140 main/binary-amd64/Release
  4e22242c09b0e1f4f48cc2f20f0accb2 833 main/binary-arm64/Packages
  cee74f47dbca1f0c3e490e82909ba7ac 536 main/binary-arm64/Packages.gz
  90b73aa63af33b9d98ef90b41a6a50a9 140 main/binary-arm64/Release
 SHA1:
- ce6bdd38f02116075bffedbc97ca8450e7da826e 833 main/binary-amd64/Packages
- 52c7d547dc0feb3ebc43e2df00bedfe1331d62f2 537 main/binary-amd64/Packages.gz
+ c4cbe8dba7c4832af38c275f72affdd20fdb1287 833 main/binary-amd64/Packages
+ 1c5df9d05aee01c1c004127c631d4abd4c7c3590 537 main/binary-amd64/Packages.gz
  91e2321d40f67e7fb58c1ef8df54d3c99965076c 140 main/binary-amd64/Release
  19f8eacd9ccbe98912f9c0b7d898796470d54ab9 833 main/binary-arm64/Packages
  f66ad0b0bc4b1e641fca89c64cd047ceaf56c277 536 main/binary-arm64/Packages.gz
  b1f99ed177c3a9920fa288ad550e6a7e6edd5b53 140 main/binary-arm64/Release
 SHA256:
- 6bc203ed97c8a38075f074dece7294b95e567a695d42e4357d8120e81db7d6e8 833 main/binary-amd64/Packages
- 8defc431969650563137a73d014325195d28de4464a8c9f3ee908746494aec27 537 main/binary-amd64/Packages.gz
+ 84f6e1eb2be56a2999b3feb5cb0855c142f971cb198492d443bc8d359b108e4d 833 main/binary-amd64/Packages
+ 28cb1212a2142b638c22cf2ed8d104388be0181e279cf531568c8966c88041c4 537 main/binary-amd64/Packages.gz
  f37b7df9107d6a79dc9aac3ed39a0ac38265a689996606e43b447c48e416a38b 140 main/binary-amd64/Release
  607940667ed169d088259366a0dd76ca3ae4b48def8cd6fe5fc35ba800202897 833 main/binary-arm64/Packages
  9b8888976fb60b2ad4c9e35a6c193fe71fc22ef726fd0e421a1a69bf25b5f3f7 536 main/binary-arm64/Packages.gz
  aa9b905c2a83e118d90cc1cf844ddd2057b3fa055b152dba0b9cff05ee9a2ae4 140 main/binary-arm64/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/xz9oACgkQ6e6N5WOf
-yWXb6Qv+N/25NaPe2B4W8YvOeFt99ibtxuL46CS5Uf611x/kOAi/Cg7ZXpFomrB9
-u85j/dDznZAf7f5OdX4uFs+q2d1sMe/sOgj2ufXCf4usoxIw05dTxjnzsfhnkui0
-m49yDS1NSnEczM/38TxiVr27V9bKPFJDArMStJHGQqjCMvvY1MqUZzZ+Wk53D3JA
-IEFYr28ym4tmUPVcM28/7liWmai94r+cF3gt3gU67kBTgGzElVhryaJL0rZ6hogo
-F0hO6SyV3SBpdVzot1Mz9pk1YbBoKe5aXMqg8+e4CnibJYeM86kOQPgd5xhW7STc
-uqvIOOtQppxjE3+//06DbMX2dPxsDD7mnAkn897BYc2cimyNkhyevhixr2rmx1Ax
-BgU8PCSDg4+DTJgO3+zASlHzKR4uXcj0902Vi0ZUV+4S//exjLBAEXU6/61Xwcf0
-mw8phHKHs+hABY45dr+G7iHby/7I0Njey0rxRq+FDJPg8gclER5NcfHGWLsSZlRs
-ALZRpX+I
-=vAAf
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/6Rr4ACgkQ6e6N5WOf
+yWVmgAv9GKCZt16VQ/I3d0eFQ5iLl3H6Ykajw7PA7lfvjeg6a2gKsplepC5kjXnI
+aoH8RbbUq6nZJztk51uVZ2u9nJJRUS9U3K2oBO66hARBY1DdowAUazb2ZbWosKso
+DvOI3wlQQFAFkUZDPqutcJII339bRfed/MWFXPq52vh+UBtMv1WFBp+jyL0s41PI
+TS/EI4JGF4QpRfRgIkqknGyCKKE71ac995wzF62xFw01k15K4m11AYBhTedjcebm
+MRHC8UDiIeJbdKpxI7eTSTxKZ5T+CbOWYyKddIS43HGk0jAaCvg9MXGv17FmbU2u
+JxdkPLzd1kTxdLoYiWmuAQX2HAj6kFHAwqWI5fA7IchomKDpfCXa6lyVdyxRH1Ij
+4IMx0DAMFn8JsTMyO6TUCrZXMW1TcmM8pty+gVpzGDqWrGqBHRaKtWSZK2NjcqOL
+ILKz/M/iK6+65IIU95iQZjHv99c3eojQHSQgBmig04jcAxoG7pJzZii4bqxxTQbn
+Zy3+3fPU
+=Y/x2
 -----END PGP SIGNATURE-----
