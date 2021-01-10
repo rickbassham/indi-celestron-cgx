@@ -4,33 +4,33 @@ Hash: SHA512
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: buster
-Date: Sun, 10 Jan 2021 00:54:01 UTC
+Date: Sun, 10 Jan 2021 22:03:48 UTC
 Architectures: armhf
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- 250732912b860c6e11e9377a96bb897e 873 main/binary-armhf/Packages
- fb41b66e5615204433819a738bd8b660 550 main/binary-armhf/Packages.gz
+ bf49b6a5a83ff2068a92e0860c18f373 873 main/binary-armhf/Packages
+ 13f035f210859070be631b169358e2a2 550 main/binary-armhf/Packages.gz
  2eb824eea30d67b6b2975155b75eb088 140 main/binary-armhf/Release
 SHA1:
- 749d976b7bad196c55e309430a7e1615a3271d01 873 main/binary-armhf/Packages
- f960b8270cb676485e4c8d9e7464608d48c61792 550 main/binary-armhf/Packages.gz
+ c336c185395cd8571e2201956e788f750bb2ff74 873 main/binary-armhf/Packages
+ 39491e930b12f9fb7ade895697925bf414c3b996 550 main/binary-armhf/Packages.gz
  b50b3f2b21f8533376aa16863c978f152e4b50a4 140 main/binary-armhf/Release
 SHA256:
- 6c8b165d3d80ef316625d59342e619c5610bfbd2cbf4e9fad2d9dfb2188e327d 873 main/binary-armhf/Packages
- 6c2291a60256da4b8ad24ffe776da0b0bdd7b96712828e838538c176ce79a65b 550 main/binary-armhf/Packages.gz
+ 2f0cb6d6aae4ffed7a6806024b002934de439c29ff00c49f89fc1ec148a08671 873 main/binary-armhf/Packages
+ 63ae6f84843b6fdfe44475a14a10ed30ddeed3633e7b16abc5cc87c538e08074 550 main/binary-armhf/Packages.gz
  2e6071c47d8d376c9c1870aa836978b3ffc45d723a39681a0151657bcd57e450 140 main/binary-armhf/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/6UCkACgkQ6e6N5WOf
-yWWauAv+PAvM+akk+LnDhq5miHIOZIDdQ/nLLhesIIDnGuha6xppqmFRV6SR/Hrc
-77jvXOI6m3zEacHQUMZA9rg/eAxtRXAAn4V0S1XWeqPgv87ay4lM3dTP18hDIe6u
-KYfN+N5sE2H16ZKCPzcL0dtn/by16ZqI/XNmCsJvYds3B2jrfLwozoOLWM3l/YiL
-BQrZhAgCI9zD14YCGPW6J5oOGTUa40X2gE0OZdXJGERqJPuECCQ/60IyrYmSkuUa
-lkr4GCoktG9A8PuU3PgSIxZW++Smdc4ImA67hzUhdB99Zx++I7NqKkGasz20keHs
-gywT+4WQomQm7s7nVYMdepve9ZKA/28WpUkGeHfGC48nFsjz34czQ/lVsGv8yOeq
-Zrp7CRsA/hEyOB5uwxRVjSrbMaBU9Qf7M8q3vIiZoczOD+DI/mWkU+XyRsqThHp8
-Nlf8df3P7HOFcntnVBnLr+0PX0fZ0zx80Pr7Eo4YzbzUSbCP01WPYMSwOMnenfl6
-NWifwdtz
-=uWOu
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/7ecQACgkQ6e6N5WOf
+yWVYtgwArYhX9EYxwNGoDLM2ishhMacDB0lacFIN8jBwzz3Rs0escmkdrWxPvWex
+gwcSDXpgD0VcvlXnvry0hhhm7VNXpoB88lFpE/8zotpRVZrgatt1wXiZAWAUpsVq
+ZZdZ6QjrTWfVmKrrS/+bY4F1j0RdrbphEbgDU8vrnQw6lNCz1hrb4Y9gcwe2u/I3
+gA2YdmwNXhtz+Ppqw9Ydh8KynlzrO/ZBNrFK3NbaO12yCCk1IU272JUj09YQceVo
+7opMVYNCwKYTcYrGgVHelR4w2e7RjJxI4Jyclk0ReSrUwLl3p1oZOdOpWwG94v1Z
+gRXi2Krmud0oHxstcqi9OmboFgAp/qOHBEzKw0Zhy2FebZmQXyNnoNa3UWJ5v+nM
+uQ/seMiI2XKFFWBKgM4QX7vInd96m8yRoos0uxrtvNS0CZt8+G/pShIsZ6LVHdnn
+G55isqd99TAADvNXhgkz9eDUjnj2HXppDty+pafm8rpqU8sgFVFDWaeuwyrbtgcS
+SxiRjard
+=mRhw
 -----END PGP SIGNATURE-----
