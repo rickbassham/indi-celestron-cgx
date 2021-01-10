@@ -1,3 +1,10 @@
+indi-celestron-cgx (1.2.6) focal; urgency=medium
+
+  * new release 1.2.6
+  * debugging build
+
+ -- Rick Bassham <brodrick.bassham@gmail.com>  Sun, 10 Jan 2021 21:39:19 +0000
+
 indi-celestron-cgx (1.2.5) focal; urgency=medium
 
   * new release 1.2.5
