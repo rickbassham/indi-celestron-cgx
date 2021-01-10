@@ -1,3 +1,10 @@
+indi-celestron-cgx (1.2.7) focal; urgency=medium
+
+  * new release 1.2.7
+  * correct path for debs
+
+ -- Rick Bassham <brodrick.bassham@gmail.com>  Sun, 10 Jan 2021 21:54:42 +0000
+
 indi-celestron-cgx (1.2.6) focal; urgency=medium
 
   * new release 1.2.6

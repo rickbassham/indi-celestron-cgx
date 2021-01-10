@@ -1,3 +1,10 @@
+## [1.2.7](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.6...v1.2.7) (2021-01-10)
+
+
+### Bug Fixes
+
+* correct path for debs ([83928cb](https://github.com/rickbassham/indi-celestron-cgx/commit/83928cb9509ff328a94c7e85c7e979bf40c11fbf))
+
 ## [1.2.6](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.5...v1.2.6) (2021-01-10)
 
 
