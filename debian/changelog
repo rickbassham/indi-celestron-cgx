@@ -1,3 +1,10 @@
+indi-celestron-cgx (1.2.5) focal; urgency=medium
+
+  * new release 1.2.5
+  * update semantic-release step
+
+ -- Rick Bassham <brodrick.bassham@gmail.com>  Sun, 10 Jan 2021 21:22:24 +0000
+
 indi-celestron-cgx (1.2.3) focal; urgency=medium
 
   * new release 1.2.3

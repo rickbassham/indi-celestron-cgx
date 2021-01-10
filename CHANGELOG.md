@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.4...v1.2.5) (2021-01-10)
+
+
+### Bug Fixes
+
+* update semantic-release step ([abc8373](https://github.com/rickbassham/indi-celestron-cgx/commit/abc8373eeef1acd77f127ed1ed995e02dcd903e6))
+
 ## [1.2.4](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.3...v1.2.4) (2021-01-10)
 
 
