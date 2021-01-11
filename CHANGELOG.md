@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.7...v1.3.0) (2021-01-11)
+
+
+### Bug Fixes
+
+* indi versioning only uses major/minor ([bed3dec](https://github.com/rickbassham/indi-celestron-cgx/commit/bed3dec530a96c3a67442df7c383fbd2e4fe79d5))
+
 ## [1.2.7](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.2.6...v1.2.7) (2021-01-10)
 
 
