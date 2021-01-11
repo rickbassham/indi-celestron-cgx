@@ -1,5 +1,35 @@
 # Celestron CGX USB driver
 
+This is an INDI driver for the Celestron CGX and CGX-L. It uses the USB port on the mount,
+and does NOT require the hand controller. The time used for alignment purposes is system
+time, so be sure whatever system you are running the driver on has a good time source.
+
+This driver has only been tested in the northern hemisphere, and will likely not work
+at all in the southern. Pull requests for southern hemisphere support are welcome.
+
+## Supported Features
+
+* Park/UnPark
+* Mount Model Alignment
+* GoTo
+* Sync
+* Tracking
+* Guiding
+
+## Unsupported (at this time)
+
+* PEC
+
+## Usage in KStars
+
+After connecting to the mount, in the INDI Control Panel, click the `Align` button.
+This will send the mount to the switch position and give us a roughly known position.
+For best results, use the `Mount Model Tool` in the KStars Alignment module to generate
+3 or more sync points and run the tool. The more sync points you add, the more accurate
+the mount model will be, which will give more precise GOTOs. After the model is built,
+you should have accurate GOTOs. NOTE: Any time you click the `Align` button, the driver
+will clear the existing model, and you'll need to re-sync to build it up again.
+
 ## Installation
 
 ### All
