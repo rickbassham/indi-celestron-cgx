@@ -1,19 +1,19 @@
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: buster
-Date: Sun, 10 Jan 2021 22:03:48 UTC
+Date: Mon, 11 Jan 2021 13:33:37 UTC
 Architectures: armhf
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- bf49b6a5a83ff2068a92e0860c18f373 873 main/binary-armhf/Packages
- 13f035f210859070be631b169358e2a2 550 main/binary-armhf/Packages.gz
+ 6df4d6a85fede6fe007fc816ddbbcea7 873 main/binary-armhf/Packages
+ e088e793a27da758a0f6f5d1c49868da 550 main/binary-armhf/Packages.gz
  2eb824eea30d67b6b2975155b75eb088 140 main/binary-armhf/Release
 SHA1:
- c336c185395cd8571e2201956e788f750bb2ff74 873 main/binary-armhf/Packages
- 39491e930b12f9fb7ade895697925bf414c3b996 550 main/binary-armhf/Packages.gz
+ 791bc87c2744f3dbde3769ca92e13dbe22fcbcd5 873 main/binary-armhf/Packages
+ 26cc92493191249e3eb347d68646adccaab98249 550 main/binary-armhf/Packages.gz
  b50b3f2b21f8533376aa16863c978f152e4b50a4 140 main/binary-armhf/Release
 SHA256:
- 2f0cb6d6aae4ffed7a6806024b002934de439c29ff00c49f89fc1ec148a08671 873 main/binary-armhf/Packages
- 63ae6f84843b6fdfe44475a14a10ed30ddeed3633e7b16abc5cc87c538e08074 550 main/binary-armhf/Packages.gz
+ af7be3db66c4caf344201e1b24ec5b7954b1e7557c381a24c9556b12ba064693 873 main/binary-armhf/Packages
+ 0ddbec310a01ff982df3ec91888cfe4d117ca84ee4c7683283bac90b8efebb9b 550 main/binary-armhf/Packages.gz
  2e6071c47d8d376c9c1870aa836978b3ffc45d723a39681a0151657bcd57e450 140 main/binary-armhf/Release
