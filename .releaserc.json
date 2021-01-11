@@ -7,7 +7,33 @@
     [
       "@semantic-release/commit-analyzer",
       {
-        "preset": "angular"
+        "preset": "angular",
+        "releaseRules": [
+          {
+            "type": "docs",
+            "release": "patch"
+          },
+          {
+            "type": "refactor",
+            "release": "patch"
+          },
+          {
+            "type": "feat",
+            "release": "major"
+          },
+          {
+            "type": "fix",
+            "release": "minor"
+          },
+          {
+            "type": "perf",
+            "release": "minor"
+          },
+          {
+            "type": "style",
+            "release": "patch"
+          }
+        ]
       }
     ],
     [
