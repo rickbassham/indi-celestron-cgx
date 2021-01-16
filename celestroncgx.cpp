@@ -95,13 +95,19 @@ bool CelestronCGX::initProperties()
     IUFillNumber(&EncoderTicksN[AXIS_DE], "ENCODER_TICKS_DEC", "Dec Encoder Ticks", "%.0f", 0,
                  STEPS_PER_REVOLUTION - 1, 1, m_alignment.GetStepsAtHomePositionDec());
     IUFillNumberVector(&EncoderTicksNP, EncoderTicksN, 2, getDeviceName(), "ENCODER_TICKS",
-                       "Encoder Ticks", MAIN_CONTROL_TAB, IP_RO, 0, IPS_IDLE);
+                       "Encoder Ticks", "Debug", IP_RO, 0, IPS_IDLE);
 
     // Hour Angle and Local Sidereal Time
     IUFillNumber(&LocationDebugN[0], "HA", "HA (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumber(&LocationDebugN[1], "LST", "LST (hh:mm:ss)", "%010.6m", 0, 24, 0, 0);
     IUFillNumberVector(&LocationDebugNP, LocationDebugN, 2, getDeviceName(), "MOUNT_POINTING_DEBUG",
-                       "Mount Pointing", MAIN_CONTROL_TAB, IP_RO, 60, IPS_IDLE);
+                       "Mount Pointing", "Debug", IP_RO, 60, IPS_IDLE);
+
+    IUFillSwitch(&SyncPositionToMountS[SYNC_POSITION_DISABLE], "DISABLED", "Disabled", ISS_ON);
+    IUFillSwitch(&SyncPositionToMountS[SYNC_POSITION_ENABLE], "ENABLED", "Enabled", ISS_OFF);
+    IUFillSwitchVector(&SyncPositionToMountSP, SyncPositionToMountS, SYNC_POSITION_N,
+                       getDeviceName(), "SYNC_POSITION_TO_MOUNT", "Sync Pos To Mount", "Debug",
+                       IP_RW, ISR_1OFMANY, 60, IPS_IDLE);
 
     // Add Tracking Modes, the order must match the order of the
     // TelescopeTrackMode enum
@@ -165,6 +171,7 @@ bool CelestronCGX::updateProperties()
 
         defineNumber(&EncoderTicksNP);
         defineNumber(&LocationDebugNP);
+        defineSwitch(&SyncPositionToMountSP);
 
         defineSwitch(&AlignSP);
         defineText(&VersionTP);
@@ -196,6 +203,7 @@ bool CelestronCGX::updateProperties()
         deleteProperty(GuideRateNP.name);
         deleteProperty(EncoderTicksNP.name);
         deleteProperty(LocationDebugNP.name);
+        deleteProperty(SyncPositionToMountSP.name);
         deleteProperty(AlignSP.name);
         deleteProperty(VersionTP.name);
     }
@@ -250,6 +258,26 @@ bool CelestronCGX::ISNewSwitch(const char *dev, const char *name, ISState *state
                 return false;
 
             forceAlignmentPosition();
+
+            return true;
+        }
+
+        if (strcmp(name, SyncPositionToMountSP.name) == 0)
+        {
+            IUUpdateSwitch(&SyncPositionToMountSP, states, names, n);
+
+            if (SyncPositionToMountS[SYNC_POSITION_ENABLE].s == ISS_ON)
+            {
+                INDI::AlignmentSubsystem::AlignmentSubsystemForDrivers::
+                    SetApproximateMountAlignmentFromMountType(EQUATORIAL);
+
+                GetAlignmentDatabase().clear();
+                UpdateSize();
+            }
+
+            SyncPositionToMountSP.s = IPS_IDLE;
+
+            IDSetSwitch(&SyncPositionToMountSP, nullptr);
 
             return true;
         }
@@ -499,7 +527,7 @@ bool CelestronCGX::ReadScopeStatus()
     getMountPosition(mountRA, mountDec, pierSide);
 
     double skyRA, skyDec;
-    TelescopeEquatorialToSky(mountRA, mountDec, skyRA, skyDec);
+    TelescopeEquatorialToSkyLocal(mountRA, mountDec, skyRA, skyDec);
 
     NewRaDec(skyRA, skyDec);
 
@@ -620,7 +648,16 @@ bool CelestronCGX::Sync(double ra, double dec)
     TelescopePierSide pierSide;
     getMountPosition(mountRA, mountDec, pierSide);
 
-    AddAlignmentEntryEquatorial(ra, dec, mountRA, mountDec);
+    if (SyncPositionToMountS[SYNC_POSITION_ENABLE].s == ISS_ON)
+    {
+        uint32_t raSteps, decSteps;
+        m_alignment.EncoderValuesFromRADec(ra, dec, raSteps, decSteps, pierSide);
+
+        m_driver.SetPosition(AXIS_RA, raSteps);
+        m_driver.SetPosition(AXIS_DE, decSteps);
+    }
+
+    AddAlignmentEntryEquatorialLocal(ra, dec, mountRA, mountDec);
 
     return true;
 }
@@ -640,7 +677,7 @@ bool CelestronCGX::StartSlew(double ra, double dec, bool skipPierSideCheck)
     TrackState = SCOPE_SLEWING;
 
     double targetRA, targetDec;
-    SkyToTelescopeEquatorial(ra, dec, targetRA, targetDec);
+    SkyToTelescopeEquatorialLocal(ra, dec, targetRA, targetDec);
 
     IDLog("ra, dec: %8.3f, %8.3f; target ra, dec: %8.3f, %8.3f\n", ra, dec, targetRA, targetDec);
 
@@ -877,12 +914,13 @@ void CelestronCGX::getMountPosition(double &ra, double &dec, TelescopePierSide &
 // TODO: Once https://github.com/indilib/indi/pull/1303 is in the stable
 // release, remove these and use the methods there.
 
-bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA,
-                                               double mountDec)
+bool CelestronCGX::AddAlignmentEntryEquatorialLocal(double actualRA, double actualDec,
+                                                    double mountRA, double mountDec)
 {
     ln_lnlat_posn location;
     if (!GetDatabaseReferencePosition(location))
     {
+        LOG_ERROR("GetDatabaseReferencePosition failed");
         return false;
     }
 
@@ -915,11 +953,13 @@ bool CelestronCGX::AddAlignmentEntryEquatorial(double actualRA, double actualDec
         return true;
     }
 
+    LOG_ERROR("CheckForDuplicateSyncPoint failed");
+
     return false;
 }
 
-bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA,
-                                            double &mountDec)
+bool CelestronCGX::SkyToTelescopeEquatorialLocal(double actualRA, double actualDec, double &mountRA,
+                                                 double &mountDec)
 {
     ln_equ_posn eq{0, 0};
     INDI::AlignmentSubsystem::TelescopeDirectionVector TDV;
@@ -953,8 +993,8 @@ bool CelestronCGX::SkyToTelescopeEquatorial(double actualRA, double actualDec, d
     return false;
 }
 
-bool CelestronCGX::TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA,
-                                            double &actualDec)
+bool CelestronCGX::TelescopeEquatorialToSkyLocal(double mountRA, double mountDec, double &actualRA,
+                                                 double &actualDec)
 {
     ln_equ_posn eq{0, 0};
     ln_lnlat_posn location;

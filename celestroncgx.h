@@ -118,12 +118,12 @@ class CelestronCGX : public INDI::Telescope,
     // AlignmentSubsystem
     // TODO: Once https://github.com/indilib/indi/pull/1303 is in the stable release,
     // remove these and use the methods there.
-    bool AddAlignmentEntryEquatorial(double actualRA, double actualDec, double mountRA,
-                                     double mountDec);
-    bool SkyToTelescopeEquatorial(double actualRA, double actualDec, double &mountRA,
-                                  double &mountDec);
-    bool TelescopeEquatorialToSky(double mountRA, double mountDec, double &actualRA,
-                                  double &actualDec);
+    bool AddAlignmentEntryEquatorialLocal(double actualRA, double actualDec, double mountRA,
+                                          double mountDec);
+    bool SkyToTelescopeEquatorialLocal(double actualRA, double actualDec, double &mountRA,
+                                       double &mountDec);
+    bool TelescopeEquatorialToSkyLocal(double mountRA, double mountDec, double &actualRA,
+                                       double &actualDec);
 
   private:
     static const uint32_t STEPS_PER_REVOLUTION;
@@ -132,23 +132,32 @@ class CelestronCGX : public INDI::Telescope,
     /// used by GoTo and Park
     bool StartSlew(double ra, double dec, bool skipPierSideCheck = false);
 
-    INumber LocationDebugN[2];
+    INumber LocationDebugN[2]{};
     INumberVectorProperty LocationDebugNP;
 
-    INumber EncoderTicksN[2];
+    INumber EncoderTicksN[2]{};
     INumberVectorProperty EncoderTicksNP;
 
-    INumber GuideRateN[2];
+    INumber GuideRateN[2]{};
     INumberVectorProperty GuideRateNP;
 
-    ISwitch AlignS[1];
+    ISwitch AlignS[1]{};
     ISwitchVectorProperty AlignSP;
 
-    ISwitch ForceLocationS[1];
+    ISwitch ForceLocationS[1]{};
     ISwitchVectorProperty ForceLocationSP;
 
-    IText VersionT[2];
+    IText VersionT[2]{};
     ITextVectorProperty VersionTP;
+
+    enum
+    {
+        SYNC_POSITION_DISABLE,
+        SYNC_POSITION_ENABLE,
+        SYNC_POSITION_N,
+    };
+    ISwitch SyncPositionToMountS[SYNC_POSITION_N]{};
+    ISwitchVectorProperty SyncPositionToMountSP;
 
     CelestronDriver::SlewRate slewRate();
 
