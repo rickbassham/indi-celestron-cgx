@@ -12,7 +12,7 @@ find_package(ZLIB REQUIRED)
 find_package(GSL REQUIRED)
 
 set(CCGX_VERSION_MAJOR 1)
-set(CCGX_VERSION_MINOR 3)
+set(CCGX_VERSION_MINOR 4)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
