@@ -4,42 +4,42 @@ Hash: SHA512
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: groovy
-Date: Mon, 11 Jan 2021 13:33:37 UTC
+Date: Sat, 16 Jan 2021 15:12:53 UTC
 Architectures: amd64 arm64
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- 17a0684ea46261c1c9d88362176cb1d8 833 main/binary-amd64/Packages
- bad13dafa9c1027c8dee7ac47b67acc2 536 main/binary-amd64/Packages.gz
+ 954d1cf3a075551e142b0d25de3f4f93 833 main/binary-amd64/Packages
+ a9af74184e3db7506b3071f98a165e08 538 main/binary-amd64/Packages.gz
  1debe5139118d4d088d9e9a517f96e19 140 main/binary-amd64/Release
- 3813f36ba108053282eb8d16bc7e503e 832 main/binary-arm64/Packages
- e132cd918248011a52fdf33181b167db 535 main/binary-arm64/Packages.gz
+ 25e4025aabea828c441c86444d87ad7d 833 main/binary-arm64/Packages
+ 63069bc4d26d342e9ac5dc3cfb32dc3a 535 main/binary-arm64/Packages.gz
  90b73aa63af33b9d98ef90b41a6a50a9 140 main/binary-arm64/Release
 SHA1:
- 3e283f35c909e7bdc1784f03b30a5dbf78c4b057 833 main/binary-amd64/Packages
- 9ddb9750d97d11994d3bdd8536e70b0a5db02625 536 main/binary-amd64/Packages.gz
+ 1ad083a97fb058310bb6092ebb8dfb33799acb74 833 main/binary-amd64/Packages
+ 8fa3682a17f3a6dec1a9f3524839c4eab8d9e8bb 538 main/binary-amd64/Packages.gz
  91e2321d40f67e7fb58c1ef8df54d3c99965076c 140 main/binary-amd64/Release
- be215418db1f23a03d6f2512e8b268e127c38946 832 main/binary-arm64/Packages
- c9281db2e316263e94cf19b39b8f86a9b62c0840 535 main/binary-arm64/Packages.gz
+ d2bda4a8613f4d774ef1147b22188bf9a812cf59 833 main/binary-arm64/Packages
+ 5a6baaa499de4a381e521ca225fd6cb4f5ae567d 535 main/binary-arm64/Packages.gz
  b1f99ed177c3a9920fa288ad550e6a7e6edd5b53 140 main/binary-arm64/Release
 SHA256:
- 1b27487ec1c051354e7e967c3b7a6e203c88c2333100fd255485c3ead6d2db90 833 main/binary-amd64/Packages
- 9c79c624c23deeb55a80b77e4c2a47d04008e5ce4fbc02b9032a322d8f27f25f 536 main/binary-amd64/Packages.gz
+ 9a0e1366ca05d08f1941abab6b3afdf76fe65d02cb0be911edb147f9c5ef95c2 833 main/binary-amd64/Packages
+ 19bfab4c07bde7e6d7a5c34d10a2d1f0f36b0d0247ac58d320154d3bb14ea689 538 main/binary-amd64/Packages.gz
  f37b7df9107d6a79dc9aac3ed39a0ac38265a689996606e43b447c48e416a38b 140 main/binary-amd64/Release
- be4e9ec141701537df65433424f15e62fed06ead00b332da483dd1e539660132 832 main/binary-arm64/Packages
- 2a273f61e6d3551f2f934b27dfccfdafb8b273fe359b55eeee95b16c16f05c14 535 main/binary-arm64/Packages.gz
+ 2a649d11c4089104adfe74b86361d596473f57e943a6a5ee5f1a9a121ed57cee 833 main/binary-arm64/Packages
+ 5d7452325dd1d8b7d5634e060cafb87a856e905b1a230a2b61d78a5b1f4d9c2d 535 main/binary-arm64/Packages.gz
  aa9b905c2a83e118d90cc1cf844ddd2057b3fa055b152dba0b9cff05ee9a2ae4 140 main/binary-arm64/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/8U7EACgkQ6e6N5WOf
-yWUA6wv+MlLOXiQzMHUkfK49vXZQSUX1UId83nUTCUCKgfz9y80uqVtqUdH29rcj
-dz9Z2cpjpyRVuT1Xu8c89ngp637sexqg72xIXtUTRRgDnkjF8KsKXs5ImHRgWBFt
-A76HR9ihR2p6MZFJp5QqETRI4IxvsAoVyV0MdLc5Wv+//gZaYY7/tE4/Knv2UyN4
-ALCM4r54YlD/RGGuOPTLtWxmcUr5UhNlTS9lfe+2sA9Ku8a3u/FURHd7Az7lCs30
-QQC+pDFngRTKBpTgS8NLJyMj4rGDXoqrkuN1CLy34hmIKPjkaa646NwjL7BNINB9
-ojCORbs1cShSfoXuz4Rb28bFFTy+wP62uLv+WgFck5oMnAXmSKDYp/knqigMsYhm
-DUCTI6AR/RWo1YSvg6zhoKPBqoYtO9tTSnuoX3jGMpQgui5PsT2jdggD562ktDEl
-dur+4xl/Hy3LAz6ByYDg0QLWfLN8PytprLskeI2IuFXCBrsnuJW0lzuKrzoPmy4Y
-kbUKa2cY
-=/PHe
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAmADAnUACgkQ6e6N5WOf
+yWUHkgv/XWieMOLsU0baAzv+uB2EsVjSduQaMzgybp2whCWr2pJ1JtztFSC2dr74
+DolPoGzPJlB4li1VsaQzjOHkEmaNyCxFUqwhRozx1nOK4wV04Ot6CMhpusxqlK0V
+iAW4E9LeIV0VsYGlW7ZNRGeAi0BIzm+f6VTnAD2V4smL5HSyfjAOwD8Gch+tX+Uf
+raVyNDfv5alAWpdxGIDRnbuulg2/IivbTiDRCn/0XBK97iPH2tWkGe46kN99X0B2
+wZt2OZ3RJh2NOMtuRydd5piZb4Fe9wwdU4AXd3Z7/e6cSRPjiBVaMhTtsr0ZytuC
+/YluzPnrH/D01skIAzJaMt4xxaLOtskvf5wXr9SwUUuYMiQpETx+FvkWzt/D7QRh
+lKaI9yV0k81J0oC1e4Oiwf5vf2LV/7QVWu/tj8T9LzECQCqnBGyyubHt+7OoZjex
+UCv6xb/Txd+pEJQYwtxrPMf8ViYCSx/fR3l2SHd2oJeHLt2abqWs5ivgtKO2F3i6
+uSSWUWOp
+=qBn4
 -----END PGP SIGNATURE-----

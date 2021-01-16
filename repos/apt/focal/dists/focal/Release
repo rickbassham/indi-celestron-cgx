@@ -1,28 +1,28 @@
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: focal
-Date: Mon, 11 Jan 2021 13:33:37 UTC
+Date: Sat, 16 Jan 2021 15:12:53 UTC
 Architectures: amd64 arm64
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- 83b7cbd516d7ccc5b07d8af94a579c94 833 main/binary-amd64/Packages
- a6e08cbac8c4d66e555a5bc628cabbf2 538 main/binary-amd64/Packages.gz
+ 995ada2a04b65e3865a281c6395e29b0 833 main/binary-amd64/Packages
+ 74adbef978c0f41b2832367312c4a5e6 539 main/binary-amd64/Packages.gz
  1debe5139118d4d088d9e9a517f96e19 140 main/binary-amd64/Release
- 2d65bedf95e5686ef31587e9a9424bb6 833 main/binary-arm64/Packages
- 264d66dd0c905719fbd1c52f9dcd4b45 536 main/binary-arm64/Packages.gz
+ adca73224c1bcbe1a34e4b1f00fe6104 833 main/binary-arm64/Packages
+ 58fd969cbca1def3f02cfce875104ad7 537 main/binary-arm64/Packages.gz
  90b73aa63af33b9d98ef90b41a6a50a9 140 main/binary-arm64/Release
 SHA1:
- 6602dc39f51b6d8abde48d66e5202abbf4b65d33 833 main/binary-amd64/Packages
- 8ea58875191c4ca3184ae938f3ef54e6052d0b56 538 main/binary-amd64/Packages.gz
+ 0e8e55d27cd616b7f3934fc97e269894d5206fae 833 main/binary-amd64/Packages
+ 99a8a0dae347d0d615e58ea6b32b9aa65df8d1b3 539 main/binary-amd64/Packages.gz
  91e2321d40f67e7fb58c1ef8df54d3c99965076c 140 main/binary-amd64/Release
- 8b2a83a50219e3d60f0af62bddabb8dcab4654d1 833 main/binary-arm64/Packages
- 12434a8eb53aef457baaceaf256b28f78b4ba992 536 main/binary-arm64/Packages.gz
+ 237eb67c1ae6511355cfdeee515a989af4859294 833 main/binary-arm64/Packages
+ 903b032972cb244c32647100807f0761b617be23 537 main/binary-arm64/Packages.gz
  b1f99ed177c3a9920fa288ad550e6a7e6edd5b53 140 main/binary-arm64/Release
 SHA256:
- f2dae58145b312a916a1af48db491ad49d754b9e3b0254c1102f5532ac98b7a9 833 main/binary-amd64/Packages
- bdd101f00c4274f950552deac2ab64b4535dc1c22433a2ca370d322aaa33154e 538 main/binary-amd64/Packages.gz
+ 68115d4f7ded8a96d4034157afe8932c097906a9260663e4f654aba2ed933629 833 main/binary-amd64/Packages
+ 8724699ac4ff73626dcc2cea53493cc640d67cca8c232061bcd29f238c61d7be 539 main/binary-amd64/Packages.gz
  f37b7df9107d6a79dc9aac3ed39a0ac38265a689996606e43b447c48e416a38b 140 main/binary-amd64/Release
- 6d099b2a25f5c727fc7cf47056e6de341759f38bfcf0b97fbc30bf6613aa32fb 833 main/binary-arm64/Packages
- 461bcbfac7bcf295d42caa2523232741f651825f44114811b0a1186f1467ac09 536 main/binary-arm64/Packages.gz
+ 881ddbe5f277c06532e809c74694ebf5a1ac895839807e9a13f5ac93486eeb76 833 main/binary-arm64/Packages
+ 681066948174d8232c8f8f1d90981892b62a4568dca07b7e4b9274ef2127fa9d 537 main/binary-arm64/Packages.gz
  aa9b905c2a83e118d90cc1cf844ddd2057b3fa055b152dba0b9cff05ee9a2ae4 140 main/binary-arm64/Release

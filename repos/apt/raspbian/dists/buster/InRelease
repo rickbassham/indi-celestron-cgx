@@ -4,33 +4,33 @@ Hash: SHA512
 Origin: indi-celestron-cgx
 Label: indi-celestron-cgx
 Codename: buster
-Date: Mon, 11 Jan 2021 13:33:37 UTC
+Date: Sat, 16 Jan 2021 15:12:53 UTC
 Architectures: armhf
 Components: main
 Description: Apt repository for indi-celestron-cgx
 MD5Sum:
- 6df4d6a85fede6fe007fc816ddbbcea7 873 main/binary-armhf/Packages
- e088e793a27da758a0f6f5d1c49868da 550 main/binary-armhf/Packages.gz
+ 55ddcf7686dbf3456795163c4ad2a109 873 main/binary-armhf/Packages
+ 148c64e7006d7f8e35bd9ce96dda9b71 550 main/binary-armhf/Packages.gz
  2eb824eea30d67b6b2975155b75eb088 140 main/binary-armhf/Release
 SHA1:
- 791bc87c2744f3dbde3769ca92e13dbe22fcbcd5 873 main/binary-armhf/Packages
- 26cc92493191249e3eb347d68646adccaab98249 550 main/binary-armhf/Packages.gz
+ 21ab0caba976106ccf4b4d66b1a15793f58ba044 873 main/binary-armhf/Packages
+ 30b389ab841aead491d0054f23ad9ee38c9bb6db 550 main/binary-armhf/Packages.gz
  b50b3f2b21f8533376aa16863c978f152e4b50a4 140 main/binary-armhf/Release
 SHA256:
- af7be3db66c4caf344201e1b24ec5b7954b1e7557c381a24c9556b12ba064693 873 main/binary-armhf/Packages
- 0ddbec310a01ff982df3ec91888cfe4d117ca84ee4c7683283bac90b8efebb9b 550 main/binary-armhf/Packages.gz
+ 2e643d90690b252f6c31849104c08ac47a72a572069d031c9b88497629d12887 873 main/binary-armhf/Packages
+ d77725d054ce5e7147bb496df54cdb91e4741390be8d79d701f25e31cc61a7ec 550 main/binary-armhf/Packages.gz
  2e6071c47d8d376c9c1870aa836978b3ffc45d723a39681a0151657bcd57e450 140 main/binary-armhf/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAl/8U7EACgkQ6e6N5WOf
-yWUyBwv6ArytZ3Jxu13wL2OLUObDnfuuAzXimTBSiaNnvWq66pthY/Un+JVfSR8q
-EN+1L53f6x/JcQBiYySOT8A1PYf2gQGxwrRgR73mlJP0m38bzT/El7I9mkJBx38e
-mvE97sa28q0IEkIYQahZouTAoT0MBRJJ+Eo/TTlY/Ljeh95AHP30rIXMKgb+TL8N
-AalLtBFGBjqknSa1INAql17glBjTvh6KM9jUNAZ21XyUHP3/SxIl9PFHdgnGj2jX
-pFOCiLXBQMz8NsYr4g1/kxpFcFv3v9HxSrx9+DKTf8C/FmbMUIi+2TaV2CoMBCJR
-wK/CCXhekaGTu5xdqZQ8HHjcL3KU+KexknXo1+gFB7TjmJuq1EKutDhRHF9n3QTv
-KQbXFAYWDPiqu1kcMS8iu/jSzsdd6Z22BOFPf1MgdH7yidcCAwG1n7x0EGtlJcWx
-N0l4B958E69puYAlnzVjI6KLB+meLyrwWF82eaeW9lfCPP4RX5OHD+FCE1L+ZxL7
-sN+06b0y
-=fVnp
+iQGzBAEBCgAdFiEE1w4bO9DEDlMqNy3A6e6N5WOfyWUFAmADAnUACgkQ6e6N5WOf
+yWWpigwAmStNQDxKHuqtiFE7bHWJSyaQo3JPNrv9iSBvzuXk8C3mY0gaHGdevjyr
+1AE4Ll4O6iVuOiywrXbdYgtaje615OezvxVg8Rhr4rZAh35Dc5l7TFXFnC9q+H5Y
+fVa6fLdiDUTRqGEQe5PNM1wzEiw7Dj8vPZeNH4SoZkaXpvR4FFSORcadJUF10t6F
+R3Wh5XRSXHEoM80KW91OfZAHSZk9jUAfNZ+1+cEv2xCiTNKuBUXBotPwGePc3SLa
+KXqFYUj2rVRxCaS0OfWmLxGXb92MpDgXGwV+T3UIJ86yXlPidrmF+xYtu7XjuHUj
+ObWqJxzThFyj521PFitmrn2qFhEJ/PFnVDSxB8gqUU9MVSUD6clkqedSxiac9fj7
+Ag3IYBib8OvDVvuqEfdzwboY8wKLUSkjHyqi69ZAa3Npqz2SONIjS9NfQrCtLH2f
+umF2zqPaD2UpWokSgYlR//CZtVNsFvAfX4L/4pD/yduqOQf7/v6Docab1gv3JnYO
+tMwbO78l
+=1Pce
 -----END PGP SIGNATURE-----
