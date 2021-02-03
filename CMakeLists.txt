@@ -37,7 +37,6 @@ add_executable(
     auxproto.cpp
     celestroncgx.cpp
     simplealignment.cpp
-    celestrondriver.cpp
 )
 
 target_link_libraries(

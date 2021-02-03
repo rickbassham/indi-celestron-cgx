@@ -1,54 +1,44 @@
-/*******************************************************************************
- Copyright(c) 2020 Rick Bassham. All rights reserved.
-
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Library General Public
- License version 2 as published by the Free Software Foundation.
- .
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Library General Public License for more details.
- .
- You should have received a copy of the GNU Library General Public License
- along with this library; see the file COPYING.LIB.  If not, write to
- the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- Boston, MA 02110-1301, USA.
-*******************************************************************************/
-
 #pragma once
 
-#include <libindi/inditelescope.h>
 #include <stdint.h>
-
-using namespace INDI;
 
 /*
 Simple class to map steps on a motor to RA/Dec and back on an EQ mount.
+
+Call UpdateSteps before using RADecFromEncoderValues. Or call EncoderValuesFromRADec to get
+the steps for a given RA/Dec.
 */
 class EQAlignment
 {
   public:
+    enum TelescopePierSide
+    {
+        PIER_UNKNOWN = -1,
+        PIER_WEST    = 0,
+        PIER_EAST    = 1
+    };
+
     EQAlignment(uint32_t stepsPerRevolution);
 
+    void UpdateSteps(uint32_t ra, uint32_t dec);
+    void UpdateStepsRA(uint32_t steps);
+    void UpdateStepsDec(uint32_t steps);
     void UpdateLongitude(double lng);
 
     void EncoderValuesFromRADec(double ra, double dec, uint32_t &raSteps, uint32_t &decSteps,
-                                Telescope::TelescopePierSide &pierSide);
+                                TelescopePierSide &pierSide);
 
-    void RADecFromEncoderValues(uint32_t raSteps, uint32_t decSteps, double &ra, double &dec,
-                                Telescope::TelescopePierSide &pierSide);
+    void RADecFromEncoderValues(double &ra, double &dec, TelescopePierSide &pierSide);
 
-    double hourAngleFromEncoder(uint32_t raSteps);
+    double hourAngleFromEncoder();
     uint32_t encoderFromHourAngle(double hourAngle);
 
-    void decAndPierSideFromEncoder(uint32_t decSteps, double &dec,
-                                   Telescope::TelescopePierSide &pierSide);
-    uint32_t encoderFromDecAndPierSide(double dec, Telescope::TelescopePierSide pierSide);
+    void decAndPierSideFromEncoder(double &dec, TelescopePierSide &pierSide);
+    uint32_t encoderFromDecAndPierSide(double dec, TelescopePierSide pierSide);
 
     double localSiderealTime();
 
-    Telescope::TelescopePierSide expectedPierSide(double ra);
+    TelescopePierSide expectedPierSide(double ra);
 
     uint32_t GetStepsAtHomePositionDec()
     {
@@ -65,6 +55,9 @@ class EQAlignment
     uint32_t m_stepsAtHomePositionRA;
     double m_stepsPerDegree;
     double m_stepsPerHour;
+
+    uint32_t m_raSteps;
+    uint32_t m_decSteps;
 
     double m_longitude;
 };
