@@ -1,3 +1,10 @@
+# [2.0.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.4.0...v2.0.0) (2021-02-03)
+
+
+### Features
+
+* rollback to known good functionality ([9e6e7fa](https://github.com/rickbassham/indi-celestron-cgx/commit/9e6e7faa0ce6908bfd4842cf0b46561520c650cf))
+
 # [1.4.0](https://github.com/rickbassham/indi-celestron-cgx/compare/v1.3.0...v1.4.0) (2021-01-16)
 
 

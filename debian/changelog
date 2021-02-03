@@ -1,3 +1,10 @@
+indi-celestron-cgx (2.0.0) focal; urgency=medium
+
+  * new release 2.0.0
+  * rollback to known good functionality
+
+ -- Rick Bassham <brodrick.bassham@gmail.com>  Wed, 03 Feb 2021 22:04:20 +0000
+
 indi-celestron-cgx (1.4.0) focal; urgency=medium
 
   * new release 1.4.0
